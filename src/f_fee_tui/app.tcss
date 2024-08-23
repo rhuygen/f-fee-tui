@@ -7,7 +7,7 @@ DEBMode {
     height: auto;
     margin: 1;
     width: 30;
-    padding: 0;
+    padding: 0 1;
 
     border: round grey;
 
@@ -30,7 +30,7 @@ OnOffLedWithLabel Label {
 }
 OnOffLedWithLabel OnOffLed {
     padding: 0;
-    width: 5;
+    width: 2;
     text-align: left;
     dock: right
 }

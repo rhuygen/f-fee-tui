@@ -3,6 +3,8 @@
 ## Version 0.1.5 — 23/08/2024
 
 - Added the `CHANGELOG.md` and a `ROADMAP.md`.
+- As an example how to change the LED color, I added a 's' toggle to change to STANDBY mode. This will set the STANDBY led to green and the ON mode led back to red.
+- Refactored a bit by putting classes in their own module file.
 
 ## Version 0.1.4 — 23/08/2024
 
