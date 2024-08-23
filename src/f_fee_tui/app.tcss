@@ -1,0 +1,36 @@
+
+DEBMode {
+
+    layout: vertical;
+    background: $boost;
+
+    height: auto;
+    margin: 1;
+    width: 30;
+    padding: 0;
+
+    border: round grey;
+
+    border-title-color: grey;
+    border-title-style: bold;
+
+}
+
+OnOffLedWithLabel {
+    layout: horizontal;
+    height: 1;
+    padding: 0;
+    margin: 1;  # use this to set margin between the widgets
+}
+OnOffLedWithLabel Label {
+    padding: 0;
+    width: 20;
+    text-align: left;
+    dock: left
+}
+OnOffLedWithLabel OnOffLed {
+    padding: 0;
+    width: 5;
+    text-align: left;
+    dock: right
+}

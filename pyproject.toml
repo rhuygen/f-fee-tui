@@ -1,0 +1,19 @@
+[project]
+name = "f-fee-tui"
+version = "0.1.4"
+description = "A Terminal User Interface to monitor and command the F-FEE for the PLATO Camera."
+keywords = ["PLATO", "F-FEE", "Textual"]
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Rik Huygen"}]
+requires-python = ">=3.8"
+dependencies = [
+    "textual"
+]
+
+[project.scripts]
+f-fee-tui = "f_fee_tui.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
