@@ -10,7 +10,7 @@ class DEBMode(Static):
     def compose(self) -> ComposeResult:
         yield OnOffLedWithLabel("ON", True, id="on")
         yield OnOffLedWithLabel("STANDBY", False, id="standby")
-        yield OnOffLedWithLabel("FULL_IMAGE", False)
-        yield OnOffLedWithLabel("FULL_IMAGE_PATTERN", False)
-        yield OnOffLedWithLabel("WINDOWING", False)
-        yield OnOffLedWithLabel("WINDOWING_PATTERN", False)
+        yield OnOffLedWithLabel("FULL_IMAGE", False, id="full_image")
+        yield OnOffLedWithLabel("FULL_IMAGE_PATTERN", False, id="full_image_pattern")
+        yield OnOffLedWithLabel("WINDOWING", False, id="windowing")
+        yield OnOffLedWithLabel("WINDOWING_PATTERN", False, id="windowing_pattern")
