@@ -16,7 +16,6 @@ class FastFEEApp(App):
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
-        ("s", "to_standby", "Set DEB mode to STANDBY"),
     ]
 
     def __init__(self):
@@ -70,7 +69,3 @@ class FastFEEApp(App):
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
         self.dark = not self.dark
-
-    def action_to_standby(self) -> None:
-        self.query_one("#standby").state = True
-        self.query_one("#on").state = False
