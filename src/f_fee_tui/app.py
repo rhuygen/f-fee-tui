@@ -5,6 +5,7 @@ from textual.widgets import Header
 
 from f_fee_tui.deb_mode import DEBMode
 from f_fee_tui.workers import DebModeChanged
+from f_fee_tui.workers import ExceptionCaught
 from f_fee_tui.workers import Monitor
 
 
@@ -61,6 +62,10 @@ class FastFEEApp(App):
             self.query_one("#standby").state = True
         elif mode == 7:
             self.query_one("#on").state = True
+
+    def on_exception_caught(self, message: ExceptionCaught):
+        self.log(str(message.exc))
+        self.log(str(message.tb))
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
