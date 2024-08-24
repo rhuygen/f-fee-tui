@@ -24,3 +24,12 @@
 ### RMAP Protocol
 
 - This needs specific commanding in the F-DPU to create an RMAP packet and send it over transport.
+
+### Monitoring
+
+- Monitoring is a background thread that currently connects to the F-DPU and the DATA_DISTRIBUTION_PORT. We also need monitoring on the MONITORING_PORT
+
+### Commanding
+
+- How are we going to implement commanding? In a similar background thread like Monitoring or with individual workers?
+- 
