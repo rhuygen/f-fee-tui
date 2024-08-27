@@ -5,8 +5,8 @@ DEBMode {
     background: $boost;
 
     height: auto;
-    margin: 1;
     width: 30;
+    margin: 1;
     padding: 0 1;
 
     border: round grey;
@@ -14,6 +14,40 @@ DEBMode {
     border-title-color: grey;
     border-title-style: bold;
 
+}
+
+DEBCommand {
+
+    layout: grid;
+    background: $boost;
+
+    grid-size: 2 3;
+    grid-rows: 1fr;
+    grid-columns: 1fr;
+    grid-gutter: 1 2;
+
+    height: 15;
+    width: 50;
+    margin: 1;
+    padding: 1 1;
+
+    border: round grey;
+
+    border-title-color: grey;
+    border-title-style: bold;
+
+}
+
+DEBCommand #btn-deb-immediate-on {
+    column-span: 2;
+    width: 1fr;
+    background: #d70000 50%;
+}
+
+DEBCommand Button {
+    background: $panel;
+    height: 5;
+    width: 1fr;
 }
 
 OnOffLedWithLabel {

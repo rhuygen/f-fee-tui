@@ -71,6 +71,9 @@ class Monitor(threading.Thread):
         self._canceled = threading.Event()
         self.hostname = dpu.HOSTNAME
         self.port = dpu.DATA_DISTRIBUTION_PORT
+
+        self.previous_deb_mode = f_fee_mode.ON_MODE
+
         super().__init__()
 
     def run(self) -> None:
@@ -120,4 +123,6 @@ class Monitor(threading.Thread):
 
             deb_mode = f_fee_mode(register_map["DEB_DTC_FEE_MOD", "OPER_MOD"])
 
-            self._app.post_message(DebModeChanged(deb_mode))
+            if deb_mode != self.previous_deb_mode:
+                self._app.post_message(DebModeChanged(deb_mode))
+                self.previous_deb_mode = deb_mode

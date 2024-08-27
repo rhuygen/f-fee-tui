@@ -1,4 +1,4 @@
-from .app import FastFEEApp
+from f_fee_tui.app import FastFEEApp
 
 
 def main():
