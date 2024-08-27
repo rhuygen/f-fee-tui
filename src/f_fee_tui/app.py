@@ -85,7 +85,7 @@ class FastFEEApp(App):
         self.dark = not self.dark
 
     def action_on_mode(self):
-        self._command_q.put_nowait(self._commanding_thread.deb_set_on_mode)
+        self._command_q.put_nowait(("DPU", "deb_set_on_mode", [], {}))
 
     def action_standby_mode(self):
-        self._command_q.put_nowait(self._commanding_thread.deb_set_standby_mode)
+        self._command_q.put_nowait(("DPU", "deb_set_standby_mode", [], {}))

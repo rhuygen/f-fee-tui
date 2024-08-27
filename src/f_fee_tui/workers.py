@@ -43,8 +43,8 @@ class Command(threading.Thread):
                 if self._canceled.is_set():
                     break
                 try:
-                    command = self._command_q.get_nowait()
-                    command()
+                    target, command, args, kwargs = self._command_q.get_nowait()
+                    self.execute_command(target, command, args, kwargs)
                     self._command_q.task_done()
                 except queue.Empty:
                     time.sleep(0.1)  # Sleep briefly to avoid busy-waiting
@@ -57,13 +57,12 @@ class Command(threading.Thread):
     def cancel(self) -> None:
         self._canceled.set()
 
-    def deb_set_on_mode(self):
-        _LOGGER.debug("Setting F-DPU to ON mode")
-        self._f_dpu.deb_set_on_mode()
-
-    def deb_set_standby_mode(self):
-        _LOGGER.debug("Setting F-DPU to STANDBY mode")
-        self._f_dpu.deb_set_standby_mode()
+    def execute_command(self, target: str, command: str, args: list, kwargs: dict):
+        if target == "DPU":
+            try:
+                return getattr(self._f_dpu, command)(*args, **kwargs)
+            except AttributeError as exc:
+                _LOGGER.error(f"No such command for DPU: {command}", exc_info=True)
 
 
 class Monitor(threading.Thread):
