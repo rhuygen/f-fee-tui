@@ -1,12 +1,15 @@
+from queue import Queue
+
 from textual.app import App
 from textual.app import ComposeResult
 from textual.widgets import Footer
 from textual.widgets import Header
 
-from f_fee_tui.deb_mode import DEBMode
-from f_fee_tui.workers import DebModeChanged
-from f_fee_tui.workers import ExceptionCaught
-from f_fee_tui.workers import Monitor
+from .deb_mode import DEBMode
+from .messages import DebModeChanged
+from .messages import ExceptionCaught
+from .workers import Command
+from .workers import Monitor
 
 
 class FastFEEApp(App):
@@ -16,11 +19,15 @@ class FastFEEApp(App):
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
+        ("o", "on_mode", "Toggle on mode"),
+        ("s", "standby_mode", "Toggle standby mode"),
     ]
 
     def __init__(self):
         super().__init__()
+        self._command_q = Queue()
         self._monitoring_thread = Monitor(self)
+        self._commanding_thread = Command(self, self._command_q)
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -30,6 +37,7 @@ class FastFEEApp(App):
 
     def on_mount(self) -> None:
         self._monitoring_thread.start()
+        self._commanding_thread.start()
 
         deb_mode_widget = self.query_one(DEBMode)
         deb_mode_widget.border_title = "DEB Mode"
@@ -38,6 +46,12 @@ class FastFEEApp(App):
         self._monitoring_thread.cancel()
         if self._monitoring_thread.is_alive():
             self._monitoring_thread.join()
+
+        self._command_q.join()
+
+        self._commanding_thread.cancel()
+        if self._commanding_thread.is_alive():
+            self._commanding_thread.join()
 
     def on_deb_mode_changed(self, message: DebModeChanged) -> None:
         mode = message.deb_mode
@@ -69,3 +83,9 @@ class FastFEEApp(App):
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
         self.dark = not self.dark
+
+    def action_on_mode(self):
+        self._command_q.put_nowait(self._commanding_thread.deb_set_on_mode)
+
+    def action_standby_mode(self):
+        self._command_q.put_nowait(self._commanding_thread.deb_set_standby_mode)

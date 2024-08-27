@@ -1,38 +1,73 @@
+from __future__ import annotations
+
+import logging
 import pickle
-import random
+import queue
 import threading
 import time
 import traceback
+from queue import Queue
+from typing import TYPE_CHECKING
 
 import zmq
+from egse.dpu.fdpu import FastCameraDPUProxy
 from egse.fee.ffee import f_fee_mode
 from egse.reg import RegisterMap
 from egse.settings import Settings
 from egse.zmq import MessageIdentifier
-from textual.message import Message
+
+from .messages import DebModeChanged
+from .messages import ExceptionCaught
+from .messages import TimeoutReached
+
+if TYPE_CHECKING:
+    from .app import FastFEEApp
+
+_LOGGER = logging.getLogger("egse.f-fee-tui")
 
 dpu = Settings.load("DPU Processor")
 
 
-class DebModeChanged(Message):
-    def __init__(self, deb_mode: int):
+class Command(threading.Thread):
+    def __init__(self, app: 'FastFEEApp', command_q: Queue) -> None:
         super().__init__()
-        self.deb_mode = deb_mode
+        self._app = app
+        self._command_q = command_q
+        self._f_dpu: FastCameraDPUProxy | None = None
+        self._canceled = threading.Event()
 
+    def run(self) -> None:
 
-class ExceptionCaught(Message):
-    def __init__(self, exc: Exception, tb=None):
-        super().__init__()
-        self.exc = exc
-        self.tb = tb
+        with FastCameraDPUProxy() as self._f_dpu:
+            while True:
+                if self._canceled.is_set():
+                    break
+                try:
+                    command = self._command_q.get_nowait()
+                    command()
+                    self._command_q.task_done()
+                except queue.Empty:
+                    time.sleep(0.1)  # Sleep briefly to avoid busy-waiting
+                    continue
+                except Exception as exc:
+                    _LOGGER.error(f"Caught and exception: {exc}")
+                    tb = traceback.format_exc()
+                    self._app.post_message(ExceptionCaught(exc, tb))
 
+    def cancel(self) -> None:
+        self._canceled.set()
 
-class TimeoutReached(Message):
-    """This message is sent when the Monitor reached a timeout on the data distribution channel."""
+    def deb_set_on_mode(self):
+        _LOGGER.debug("Setting F-DPU to ON mode")
+        self._f_dpu.deb_set_on_mode()
+
+    def deb_set_standby_mode(self):
+        _LOGGER.debug("Setting F-DPU to STANDBY mode")
+        self._f_dpu.deb_set_standby_mode()
 
 
 class Monitor(threading.Thread):
-    def __init__(self, app: "FastFEEApp") -> None:
+    def __init__(self, app: 'FastFEEApp') -> None:
         self._app = app
         self._canceled = threading.Event()
         self.hostname = dpu.HOSTNAME
@@ -74,24 +109,6 @@ class Monitor(threading.Thread):
 
         receiver.disconnect(f"tcp://{self.hostname}:{self.port}")
         receiver.close()
-
-    # Change the name of this function to run() if you just want tp see a simulation
-    # of changing LEDs
-    def run_sim(self) -> None:
-        prev_deb_mode = 0
-
-        while True:
-            if self._canceled.is_set():
-                return
-
-            if prev_deb_mode == (deb_mode := random.choice([0, 1, 2, 3, 6, 7])):
-                continue
-            else:
-                prev_deb_mode = deb_mode
-
-            self._app.post_message(DebModeChanged(deb_mode))
-
-            time.sleep(0.1)
 
     def cancel(self) -> None:
         self._canceled.set()

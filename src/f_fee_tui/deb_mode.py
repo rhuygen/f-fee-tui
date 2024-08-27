@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.widgets import Static
 
-from f_fee_tui.leds import OnOffLedWithLabel
+from .leds import OnOffLedWithLabel
 
 
 class DEBMode(Static):
