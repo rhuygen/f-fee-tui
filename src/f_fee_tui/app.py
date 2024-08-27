@@ -12,6 +12,8 @@ from .deb_command import DEBCommand
 from .deb_mode import DEBMode
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
+from .messages import ProblemDetected
+from .messages import TimeoutReached
 from .workers import Command
 from .workers import Monitor
 
@@ -109,6 +111,12 @@ class FastFEEApp(App):
     def on_exception_caught(self, message: ExceptionCaught):
         self.log(str(message.exc))
         self.log(str(message.tb))
+
+    def on_problem_detected(self, problem: ProblemDetected):
+        self.notify(problem.message, severity="warning", title="WARNING")
+
+    def on_timeout_reached(self, message: TimeoutReached):
+        self.notify(message.message, title="Timeout")
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""

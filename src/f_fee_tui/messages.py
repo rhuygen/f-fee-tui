@@ -18,3 +18,13 @@ class ExceptionCaught(Message):
 
 class TimeoutReached(Message):
     """This message is sent when the Monitor or Commanding thread reached a timeout."""
+    def __init__(self, msg: str):
+        super().__init__()
+        self.message = msg
+
+
+class ProblemDetected(Message):
+    """A notification message for a problem that needs reporting."""
+    def __init__(self, msg: str,):
+        super().__init__()
+        self.message = msg

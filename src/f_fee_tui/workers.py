@@ -106,7 +106,7 @@ class Monitor(threading.Thread):
             if len(socket_list) == 0:
                 n_timeouts += 1
                 if n_timeouts > 3:  # at least a timecode should arrive every 2.5s
-                    self._app.post_message(TimeoutReached())
+                    self._app.post_message(TimeoutReached("Timeout reached after 3s on monitoring channel."))
                     n_timeouts = 0
 
         receiver.disconnect(f"tcp://{self.hostname}:{self.port}")
