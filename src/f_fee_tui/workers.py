@@ -16,6 +16,7 @@ from egse.reg import RegisterMap
 from egse.settings import Settings
 from egse.zmq import MessageIdentifier
 
+from .messages import AebStateChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
 from .messages import TimeoutReached
@@ -73,6 +74,7 @@ class Monitor(threading.Thread):
         self.port = dpu.DATA_DISTRIBUTION_PORT
 
         self.previous_deb_mode = f_fee_mode.ON_MODE
+        self.previous_aeb_state = {}
 
         super().__init__()
 
@@ -126,3 +128,11 @@ class Monitor(threading.Thread):
             if deb_mode != self.previous_deb_mode:
                 self._app.post_message(DebModeChanged(deb_mode))
                 self.previous_deb_mode = deb_mode
+
+            # for aeb_id in "AEB1", "AEB2", "AEB3", "AEB4":
+            for aeb_nr in (1, 2, 3, 4):
+                aeb_state_type = f"aeb{aeb_nr}_onoff"
+                aeb_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
+                if aeb_state != self.previous_aeb_state.get(aeb_state_type, 0):
+                    self._app.post_message(AebStateChanged(aeb_state_type, aeb_state))
+                    self.previous_aeb_state[aeb_state_type] = aeb_state
