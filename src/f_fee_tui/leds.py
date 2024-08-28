@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widget import Widget
@@ -10,9 +12,15 @@ class OnOffLed(Static):
 
     state = reactive(False)
 
+    def __init__(self, **kwargs):
+        self._true, self._false = kwargs.pop("states", ("🟩", "🟥"))
+        super().__init__(**kwargs)
+
     def watch_state(self, state: bool) -> None:
         # self.update("🟢" if self.state else "🔴")
-        self.update("🟩" if state else "🟥")
+        # self.update("✅" if self.state else "")
+        # self.update("🟩" if state else "🟥")
+        self.update(self._true if self.state else self._false)
 
 
 class OnOffLedWithLabel(Widget):
