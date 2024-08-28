@@ -4,7 +4,7 @@ DEBMode {
     layout: vertical;
     background: $boost;
 
-    height: auto;
+    height: 15;
     width: 30;
     margin: 1;
     padding: 0 1;
@@ -50,6 +50,37 @@ DEBCommand Button {
     width: 1fr;
 }
 
+AEBState {
+
+    layout: grid;
+    grid-size: 6 5;
+    grid-rows: 2;
+    grid-gutter: 0;
+
+    background: $boost;
+
+    height: 15;
+    width: 60;
+    margin: 1;
+    padding: 0 1;
+
+    border: round grey;
+
+    border-title-color: grey;
+    border-title-style: bold;
+
+    OnOffLed {
+        text-align: center;
+        width: 1fr;
+        margin: 0;
+    }
+
+    Label {
+        text-align: center;
+        width: 1fr;
+    }
+}
+
 OnOffLedWithLabel {
     layout: horizontal;
     height: 1;
@@ -65,6 +96,6 @@ OnOffLedWithLabel Label {
 OnOffLedWithLabel OnOffLed {
     padding: 0;
     width: 2;
-    text-align: left;
+    text-align: center;
     dock: right
 }

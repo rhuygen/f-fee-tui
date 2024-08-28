@@ -8,8 +8,10 @@ from textual.widgets import Button
 from textual.widgets import Footer
 from textual.widgets import Header
 
+from .aeb_state import AEBState
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
+from .messages import AebStateChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
 from .messages import ProblemDetected
@@ -39,6 +41,8 @@ class FastFEEApp(App):
         yield Footer()
         with Horizontal():
             yield DEBMode()
+            yield AEBState()
+        with Horizontal():
             yield DEBCommand()
 
     def on_mount(self) -> None:
@@ -50,6 +54,10 @@ class FastFEEApp(App):
 
         deb_command_widget = self.query_one(DEBCommand)
         deb_command_widget.border_title = "DEB Commanding"
+
+        aeb_state_widget = self.query_one(AEBState)
+        aeb_state_widget.border_title = "AEB State"
+
 
     def on_unmount(self) -> None:
         self._monitoring_thread.cancel()
@@ -107,6 +115,15 @@ class FastFEEApp(App):
 
         from egse.fee.ffee import f_fee_mode
         self.notify(f"F-FEE set to {f_fee_mode(mode).name}")
+
+    def on_aeb_state_changed(self, message: AebStateChanged):
+        aeb_state = message.aeb_state
+        aeb_state_type = message.aeb_state_type
+
+        aeb_state_widget = self.query_one(AEBState)
+        aeb_state_widget.set_state(aeb_state_type, aeb_state)
+
+        self.notify(f"AEB State changed: {aeb_state_type}, {aeb_state}")
 
     def on_exception_caught(self, message: ExceptionCaught):
         self.log(str(message.exc))
