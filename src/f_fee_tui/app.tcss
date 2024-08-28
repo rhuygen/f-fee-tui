@@ -81,6 +81,37 @@ AEBState {
     }
 }
 
+AEBCommand {
+
+    layout: vertical;
+    background: $boost;
+
+    height: 15;
+    width: 1fr;
+    margin: 1;
+    padding: 0 1;
+
+    border: round grey;
+
+    border-title-color: grey;
+    border-title-style: bold;
+
+    Label {
+        border: tall grey 50%;
+        text-align: center;
+        height: 3;
+        width: 15;
+        margin: 0;
+    }
+
+    Button {
+        height: 3;
+        margin: 0 1;
+        padding: 0;
+    }
+
+}
+
 OnOffLedWithLabel {
     layout: horizontal;
     height: 1;

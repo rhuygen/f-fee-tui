@@ -1,5 +1,10 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.8 — 28/08/2024
+
+- Added AEB Commanding widget
+- AEB Commanding for powering ON/OFF AEBs 
+
 ## Version 0.1.7 — 28/08/2024
 
 - Added ProblemDetected message for reporting a problem

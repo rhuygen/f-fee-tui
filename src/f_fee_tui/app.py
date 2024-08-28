@@ -1,3 +1,4 @@
+import re
 from queue import Queue
 
 from textual import on
@@ -8,6 +9,7 @@ from textual.widgets import Button
 from textual.widgets import Footer
 from textual.widgets import Header
 
+from .aeb_command import AEBCommand
 from .aeb_state import AEBState
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
@@ -44,6 +46,7 @@ class FastFEEApp(App):
             yield AEBState()
         with Horizontal():
             yield DEBCommand()
+            yield AEBCommand()
 
     def on_mount(self) -> None:
         self._monitoring_thread.start()
@@ -57,6 +60,9 @@ class FastFEEApp(App):
 
         aeb_state_widget = self.query_one(AEBState)
         aeb_state_widget.border_title = "AEB State"
+
+        aeb_command_widget = self.query_one(AEBCommand)
+        aeb_command_widget.border_title = "AEB Commanding"
 
 
     def on_unmount(self) -> None:
@@ -89,6 +95,25 @@ class FastFEEApp(App):
     @on(Button.Pressed, "#btn-deb-full-image-pattern")
     def command_deb_to_full_image_pattern_mode(self):
         self._command_q.put_nowait(("DPU", "deb_set_full_image_pattern_mode", [], {}))
+
+    @on(Button.Pressed, ".command.aeb.power")
+    def command_aeb_power(self, message: Button.Pressed):
+        button = message.button
+
+        # Determine if power-on or power-off was requested
+        cmd = "deb_set_aeb_power_on" if button.id.endswith("-on") else "deb_set_aeb_power_off"
+
+        # button.id shall have the following format 'btn-aeb[1-4]-[\w-]+'
+        match = re.search(r'\d', button.id)
+        if match:
+            aeb_nr = int(match.group())
+        else:
+            self.notify(message=f"Couldn't match AEB number in {button.id}", severity="error", timeout=5.0)
+            return
+
+        args = [1 if aeb_nr == x else 0 for x in (1, 2, 3, 4)]
+
+        self._command_q.put_nowait(("DPU", cmd, args, {}))
 
     def on_deb_mode_changed(self, message: DebModeChanged) -> None:
         mode = message.deb_mode
