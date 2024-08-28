@@ -1,5 +1,13 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.7 — 28/08/2024
+
+- Added ProblemDetected message for reporting a problem
+- Updated TimeoutReached message with a message argument
+- Added a new widget representing the AEB states
+- Added AebStateChange message and the Monitor Thread now handle AEB state changes
+- LEDs now can take a states argument to set the ON and OFF representation
+
 ## Version 0.1.6 — 27/08/2024
 
 - Removed the example where the STANDBY LED would toggle if you pressed the 's' key. The DEB modes are now handled by the Monitoring Thread.
