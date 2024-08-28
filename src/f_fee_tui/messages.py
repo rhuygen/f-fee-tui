@@ -8,6 +8,14 @@ class DebModeChanged(Message):
         self.deb_mode = deb_mode
 
 
+class AebStateChanged(Message):
+    """This message reports on the State of the AEBs."""
+    def __init__(self, aeb_state_type, aeb_state):
+        super().__init__()
+        self.aeb_state_type = aeb_state_type
+        self.aeb_state = aeb_state
+
+
 class ExceptionCaught(Message):
     """This message is sent whenever a non-resolvable exception occurs in the Monitor or Commanding thread."""
     def __init__(self, exc: Exception, tb=None):
