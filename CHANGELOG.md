@@ -1,5 +1,9 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.10 — 29/08/2024
+
+- Added platform information in subtitle
+
 ## Version 0.1.9 — 29/08/2024
 
 - Added tooltips for DEB and AEB commanding
