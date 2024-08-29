@@ -1,3 +1,4 @@
+import platform
 import re
 from queue import Queue
 
@@ -36,6 +37,10 @@ class FastFEEApp(App):
         self._command_q = Queue()
         self._monitoring_thread = Monitor(self)
         self._commanding_thread = Command(self, self._command_q)
+
+        self.title = "F-FEE TUI"
+        self.sub_title = f"({platform.platform()})"
+
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
