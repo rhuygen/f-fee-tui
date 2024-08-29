@@ -70,7 +70,7 @@ class FastFEEApp(App):
         if self._monitoring_thread.is_alive():
             self._monitoring_thread.join()
 
-        self._command_q.join()
+        self._command_q.join()  # FIXME: this blocks when the DPU CS is not responding or not running
 
         self._commanding_thread.cancel()
         if self._commanding_thread.is_alive():

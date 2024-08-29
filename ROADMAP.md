@@ -13,9 +13,16 @@
 
 ### DEB Commanding
 
+- [ ] Implement Set FPGA defaults
+- [ ] Implement Sync register map
+
 ### AEB Mode
 
+- How can we determine the AEB mode? Is this only from the HK data?
+
 ### AEB Commanding
+
+- [ ] Implement AEB mode changing commands
 
 ### Running an SFT
 
@@ -47,8 +54,12 @@
 
 ## Commanding
 
-- [ ] How are we going to implement commanding? In a similar background thread like Monitoring or with individual workers?
-- 
+- [x] How are we going to implement commanding? In a similar background thread like Monitoring or with individual workers? -> Implemented a Commanding Thread.
+- [x] Implement AEB Power ON/OFF commanding
+- [ ] Implement AEB mode change commanding
+- What about non FEE related commands that are nevertheless useful?
+  - start/end observation
+  - 
 
 
 ## Help Panel
