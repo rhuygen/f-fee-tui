@@ -155,10 +155,10 @@ class Monitor(threading.Thread):
                 aeb_status = hk_data["STATUS", "AEB_STATUS"]
                 self._app.log(f"AEB_STATE = {aeb_state(aeb_status).name}")
                 if aeb_status == aeb_state.INIT:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", aeb_status))
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
                 elif aeb_status == aeb_state.CONFIG:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", aeb_status))
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))
                 elif aeb_status == aeb_state.IMAGE:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_image", aeb_status))
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_image", True))
                 elif aeb_status == aeb_state.PATTERN:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_pattern", aeb_status))
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_pattern", True))

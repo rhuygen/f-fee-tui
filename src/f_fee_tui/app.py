@@ -12,6 +12,7 @@ from textual.widgets import Header
 
 from .aeb_command import AEBCommand
 from .aeb_state import AEBState
+from .aeb_state import get_aeb_nr
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
 from .messages import AebStateChanged
@@ -108,11 +109,7 @@ class FastFEEApp(App):
         # Determine if power-on or power-off was requested
         cmd = "deb_set_aeb_power_on" if button.id.endswith("-on") else "deb_set_aeb_power_off"
 
-        # button.id shall have the following format 'btn-aeb[1-4]-[\w-]+'
-        match = re.search(r'\d', button.id)
-        if match:
-            aeb_nr = int(match.group())
-        else:
+        if (aeb_nr := get_aeb_nr(button.id)) is None:
             self.notify(message=f"Couldn't match AEB number in {button.id}", severity="error", timeout=5.0)
             return
 
@@ -147,8 +144,8 @@ class FastFEEApp(App):
         self.notify(f"F-FEE set to {f_fee_mode(mode).name}")
 
     def on_aeb_state_changed(self, message: AebStateChanged):
-        aeb_state = message.aeb_state
-        aeb_state_type = message.aeb_state_type
+        aeb_state: bool = message.aeb_state
+        aeb_state_type: str = message.aeb_state_type
 
         aeb_state_widget = self.query_one(AEBState)
         aeb_state_widget.set_state(aeb_state_type, aeb_state)
