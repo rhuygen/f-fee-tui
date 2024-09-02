@@ -52,17 +52,14 @@ class AEBState(Static):
             self.notify(f"Couldn't derive AEB unit number from {aeb_state_type=}", severity="warning")
             return
 
-        if aeb_state_type.endswith("onoff"):
-            self.query_one(f"#{aeb_state_type}", OnOffLed).state = aeb_state
-        else:
-            # Clear the previous state
+        # Clear the current state
 
-            self.query_one(f"#aeb{aeb_nr}_init", OnOffLed).state = False
-            self.query_one(f"#aeb{aeb_nr}_config", OnOffLed).state = False
-            self.query_one(f"#aeb{aeb_nr}_image", OnOffLed).state = False
-            self.query_one(f"#aeb{aeb_nr}_pattern", OnOffLed).state = False
+        self.query_one(f"#aeb{aeb_nr}_init", OnOffLed).state = False
+        self.query_one(f"#aeb{aeb_nr}_config", OnOffLed).state = False
+        self.query_one(f"#aeb{aeb_nr}_image", OnOffLed).state = False
+        self.query_one(f"#aeb{aeb_nr}_pattern", OnOffLed).state = False
 
-            self.query_one(f"#{aeb_state_type}", OnOffLed).state = aeb_state
+        self.query_one(f"#{aeb_state_type}", OnOffLed).state = aeb_state
 
 
 def get_aeb_nr(string: str):

@@ -20,6 +20,7 @@ from egse.setup import load_setup
 from egse.zmq import MessageIdentifier
 
 from .messages import AebStateChanged
+from .messages import AebPowerChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
 from .messages import TimeoutReached
@@ -140,7 +141,7 @@ class Monitor(threading.Thread):
                 aeb_state_type = f"aeb{aeb_nr}_onoff"
                 aeb_power_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
                 if aeb_power_state != self.previous_aeb_state.get(aeb_state_type, 0):
-                    self._app.post_message(AebStateChanged(aeb_state_type, aeb_power_state))
+                    self._app.post_message(AebPowerChanged(aeb_state_type, aeb_power_state))
                     self.previous_aeb_state[aeb_state_type] = aeb_power_state
 
         elif sync_id == MessageIdentifier.SYNC_HK_DATA:
@@ -154,9 +155,10 @@ class Monitor(threading.Thread):
                 hk_data = HousekeepingData(aeb_id, data, setup)
                 aeb_status = hk_data["STATUS", "AEB_STATUS"]
                 self._app.log(f"AEB_STATE = {aeb_state(aeb_status).name}")
-                if aeb_status == aeb_state.OFF:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_onoff", False))
-                elif aeb_status == aeb_state.INIT:
+
+                # Power in handled by the DEB_DTC_AEB_ONOFF state from the DEB register map above.
+
+                if aeb_status == aeb_state.INIT:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
                 elif aeb_status == aeb_state.CONFIG:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))

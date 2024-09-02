@@ -16,6 +16,7 @@ from .aeb_state import get_aeb_nr
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
 from .messages import AebStateChanged
+from .messages import AebPowerChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
 from .messages import ProblemDetected
@@ -142,6 +143,13 @@ class FastFEEApp(App):
 
         from egse.fee.ffee import f_fee_mode
         self.notify(f"F-FEE set to {f_fee_mode(mode).name}")
+
+    def on_aeb_power_changed(self, message: AebPowerChanged):
+        aeb_state: bool = message.aeb_state
+        aeb_state_type: str = message.aeb_state_type
+
+        aeb_state_widget = self.query_one(AEBState)
+        aeb_state_widget.set_state(aeb_state_type, aeb_state)
 
     def on_aeb_state_changed(self, message: AebStateChanged):
         aeb_state: bool = message.aeb_state
