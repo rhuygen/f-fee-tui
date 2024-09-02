@@ -154,7 +154,9 @@ class Monitor(threading.Thread):
                 hk_data = HousekeepingData(aeb_id, data, setup)
                 aeb_status = hk_data["STATUS", "AEB_STATUS"]
                 self._app.log(f"AEB_STATE = {aeb_state(aeb_status).name}")
-                if aeb_status == aeb_state.INIT:
+                if aeb_status == aeb_state.OFF:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_onoff", False))
+                elif aeb_status == aeb_state.INIT:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
                 elif aeb_status == aeb_state.CONFIG:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))

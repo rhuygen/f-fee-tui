@@ -53,7 +53,7 @@ class AEBState(Static):
             return
 
         if aeb_state_type.endswith("onoff"):
-            self.query_one(f"#{aeb_state_type}", OnOffLed).state = bool(aeb_state)
+            self.query_one(f"#{aeb_state_type}", OnOffLed).state = aeb_state
         else:
             # Clear the previous state
 
