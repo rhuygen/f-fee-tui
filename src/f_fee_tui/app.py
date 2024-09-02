@@ -153,7 +153,8 @@ class FastFEEApp(App):
         aeb_state_widget = self.query_one(AEBState)
         aeb_state_widget.set_state(aeb_state_type, aeb_state)
 
-        self.notify(f"AEB State changed: {aeb_state_type}, {aeb_state}")
+        # Should only notify if new state != old state
+        # self.notify(f"AEB State changed: {aeb_state_type}, {aeb_state}")
 
     def on_exception_caught(self, message: ExceptionCaught):
         self.log(str(message.exc))

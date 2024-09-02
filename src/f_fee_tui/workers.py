@@ -11,9 +11,12 @@ from typing import TYPE_CHECKING
 
 import zmq
 from egse.dpu.fdpu import FastCameraDPUProxy
+from egse.fee.ffee import HousekeepingData
+from egse.fee.ffee import aeb_state
 from egse.fee.ffee import f_fee_mode
 from egse.reg import RegisterMap
 from egse.settings import Settings
+from egse.setup import load_setup
 from egse.zmq import MessageIdentifier
 
 from .messages import AebStateChanged
@@ -88,6 +91,8 @@ class Monitor(threading.Thread):
         receiver.setsockopt_string(zmq.SUBSCRIBE, "")
         receiver.connect(f"tcp://{self.hostname}:{self.port}")
 
+        setup = load_setup()
+
         while True:
             if self._canceled.is_set():
                 break
@@ -100,7 +105,7 @@ class Monitor(threading.Thread):
                     sync_id, pickle_string = receiver.recv_multipart()
                     sync_id = int.from_bytes(sync_id, byteorder='big')
                     data = pickle.loads(pickle_string)
-                    self.handle_messages(sync_id, data)
+                    self.handle_messages(sync_id, data, setup)
                 except Exception as exc:
                     tb = traceback.format_exc()
                     self._app.post_message(ExceptionCaught(exc, tb))
@@ -117,9 +122,10 @@ class Monitor(threading.Thread):
     def cancel(self) -> None:
         self._canceled.set()
 
-    def handle_messages(self, sync_id, data):
+    def handle_messages(self, sync_id, data, setup):
 
         if sync_id == MessageIdentifier.F_FEE_REGISTER_MAP:
+
             register_map, _ = data
             register_map = RegisterMap("F-FEE", memory_map=register_map)
 
@@ -132,7 +138,27 @@ class Monitor(threading.Thread):
             # for aeb_id in "AEB1", "AEB2", "AEB3", "AEB4":
             for aeb_nr in (1, 2, 3, 4):
                 aeb_state_type = f"aeb{aeb_nr}_onoff"
-                aeb_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
-                if aeb_state != self.previous_aeb_state.get(aeb_state_type, 0):
-                    self._app.post_message(AebStateChanged(aeb_state_type, aeb_state))
-                    self.previous_aeb_state[aeb_state_type] = aeb_state
+                aeb_power_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
+                if aeb_power_state != self.previous_aeb_state.get(aeb_state_type, 0):
+                    self._app.post_message(AebStateChanged(aeb_state_type, aeb_power_state))
+                    self.previous_aeb_state[aeb_state_type] = aeb_power_state
+
+        elif sync_id == MessageIdentifier.SYNC_HK_DATA:
+
+            cmd, aeb_id, data, timestamp = data
+
+            if cmd == 'command_deb_read_hk':
+                ...
+            elif cmd == 'command_aeb_read_hk':
+                aeb_id = aeb_id[0]  # this comes from the args, so it's a list
+                hk_data = HousekeepingData(aeb_id, data, setup)
+                aeb_status = hk_data["STATUS", "AEB_STATUS"]
+                self._app.log(f"AEB_STATE = {aeb_state(aeb_status).name}")
+                if aeb_status == aeb_state.INIT:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", aeb_status))
+                elif aeb_status == aeb_state.CONFIG:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", aeb_status))
+                elif aeb_status == aeb_state.IMAGE:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_image", aeb_status))
+                elif aeb_status == aeb_state.PATTERN:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_pattern", aeb_status))

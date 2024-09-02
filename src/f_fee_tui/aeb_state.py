@@ -4,7 +4,6 @@ from textual.widgets import Static
 
 from .leds import OnOffLed
 
-
 class AEBState(Static):
     """A widget to monitor the state of the AEBs."""
 
