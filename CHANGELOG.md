@@ -1,5 +1,9 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.12 — 02/09/2024
+
+- Fix a problem when AEB state is OFF, other states were not cleared
+
 ## Version 0.1.11 — 02/09/2024
 
 - The AEB State panel is now fully functional, i.e. also the INIT, CONFIG, IMAGE, and PATTERN states are reported.
