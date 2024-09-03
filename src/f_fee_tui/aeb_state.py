@@ -52,7 +52,18 @@ class AEBState(Static):
             self.notify(f"Couldn't derive AEB unit number from {aeb_state_type=}", severity="warning")
             return
 
-        # Clear the current state
+        old_onoff_state = self.query_one(f"#aeb{aeb_nr}_onoff", OnOffLed).state
+        old_other_state = self.query_one(f"#{aeb_state_type}", OnOffLed).state
+
+        # When the state is init, config, image, or pattern, set the onoff led also, otherwise
+        # onoff will be cleared below.
+
+        if not aeb_state_type.endswith("_onoff"):
+            self.query_one(f"#aeb{aeb_nr}_onoff", OnOffLed).state = True
+            if old_onoff_state is False:
+                self.notify(f"AEB{aeb_nr} is Powered ON")
+
+        # Clear the current states except ONOFF
 
         self.query_one(f"#aeb{aeb_nr}_init", OnOffLed).state = False
         self.query_one(f"#aeb{aeb_nr}_config", OnOffLed).state = False
@@ -63,7 +74,11 @@ class AEBState(Static):
 
 
 def get_aeb_nr(string: str):
+    """
+    Returns the first digit that matched in the given string. Intended to match the AEB number.
 
+    Returns None when no match.
+    """
     # The first digit that is matched in 'string' will be returned.
     #
     # This is used for:
