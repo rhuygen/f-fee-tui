@@ -16,7 +16,6 @@ from .aeb_state import get_aeb_nr
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
 from .messages import AebStateChanged
-from .messages import AebPowerChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
 from .messages import ProblemDetected
@@ -118,6 +117,54 @@ class FastFEEApp(App):
 
         self._command_q.put_nowait(("DPU", cmd, args, {}))
 
+    @on(Button.Pressed, ".command.aeb.init")
+    def command_aeb_to_init(self, message: Button.Pressed):
+        button = message.button
+
+        cmd = "aeb_set_init_mode"
+
+        if (aeb_nr := get_aeb_nr(button.id)) is None:
+            self.notify(message=f"Couldn't match AEB number in {button.id}", severity="error", timeout=5.0)
+            return
+
+        args = [f"AEB{aeb_nr}"]
+
+        self._command_q.put_nowait(("DPU", cmd, args, {}))
+
+    @on(Button.Pressed, ".command.aeb.config")
+    def command_aeb_to_config(self, message: Button.Pressed):
+        button = message.button
+
+        cmd = "aeb_set_config_mode"
+
+        if (aeb_nr := get_aeb_nr(button.id)) is None:
+            self.notify(message=f"Couldn't match AEB number in {button.id}", severity="error", timeout=5.0)
+            return
+
+        args = [f"AEB{aeb_nr}"]
+
+        self._command_q.put_nowait(("DPU", cmd, args, {}))
+
+    @on(Button.Pressed, ".command.aeb.image")
+    def command_aeb_to_image(self, message: Button.Pressed):
+        button = message.button
+
+        cmd = "aeb_set_image_mode"
+
+        if (aeb_nr := get_aeb_nr(button.id)) is None:
+            self.notify(message=f"Couldn't match AEB number in {button.id}", severity="error", timeout=5.0)
+            return
+
+        args = [f"AEB{aeb_nr}"]
+
+        self._command_q.put_nowait(("DPU", cmd, args, {}))
+
+    @on(Button.Pressed, ".command.aeb.pattern")
+    def command_aeb_to_pattern(self, message: Button.Pressed):
+        button = message.button
+
+        self.notify("AEB Pattern mode not yet implemented.", severity="warning")
+
     def on_deb_mode_changed(self, message: DebModeChanged) -> None:
         mode = message.deb_mode
 
@@ -141,15 +188,9 @@ class FastFEEApp(App):
         elif mode == 7:
             self.query_one("#deb-on").state = True
 
-        from egse.fee.ffee import f_fee_mode
-        self.notify(f"F-FEE set to {f_fee_mode(mode).name}")
-
-    def on_aeb_power_changed(self, message: AebPowerChanged):
-        aeb_state: bool = message.aeb_state
-        aeb_state_type: str = message.aeb_state_type
-
-        aeb_state_widget = self.query_one(AEBState)
-        aeb_state_widget.set_state(aeb_state_type, aeb_state)
+        # Should only notify if new state != old state
+        # from egse.fee.ffee import f_fee_mode
+        # self.notify(f"F-FEE set to {f_fee_mode(mode).name}")
 
     def on_aeb_state_changed(self, message: AebStateChanged):
         aeb_state: bool = message.aeb_state
