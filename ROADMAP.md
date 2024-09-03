@@ -11,6 +11,8 @@
 
 ### DEB Mode
 
+- [ ]  The DEB mode shall be updated from the DEB HK instead of the Register Map. The register map might be out of sync with the F-FEE for several reasons (mainly synchronisation issues). The DEB HK is sent on every cycle right after the timecode and accurately reflects the state of the DEB.
+
 ### DEB Commanding
 
 - [ ] Implement Set FPGA defaults
@@ -18,10 +20,11 @@
 
 ### AEB Mode
 
-- How can we determine the AEB mode? Is this only from the HK data?
+- [x] The AEB State shall be determined from the AEB HK data that is sent every cycle.
 
 ### AEB Commanding
 
+- [x] Implement AEB Power ON/OFF commands
 - [ ] Implement AEB mode changing commands
 
 ### Running an SFT
@@ -34,7 +37,8 @@
 
 ## Monitoring
 
-- [ ] Monitoring is a background thread that currently connects to the F-DPU and the DATA_DISTRIBUTION_PORT. We also need monitoring on the MONITORING_PORT
+- [x] Monitoring is a background thread that connects to the F-DPU and the DATA_DISTRIBUTION_PORT.
+- [ ] Do we also need monitoring on the MONITORING_PORT?
 - [ ] Should we provide a mechanism to request updates from the monitoring at regular intervals (say 2.5s) instead of letting the Monitoring thread handle this. We could do this with the following line (add in on_mount() after starting the thread). The poll interval can be a setting of the App.
 	```python
 	self.set_interval(self._poll_interval, self._monitoring_thread.schedule_update)
@@ -50,7 +54,8 @@
   - The core services MONITORING_PORT to report on CPU and memory usage, etc.
   - The Data Dumper MONITORING_PORT for TIMECODES, HDF5_FILENAME
   - The DPU DATA_DISTRIBUTION_PORT for Register Maps HK packets, etc.
-  - 
+
+- [ ] Shall we try to implement monitoring asynchronously instead of with threads?  
 
 ## Commanding
 

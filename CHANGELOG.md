@@ -1,4 +1,10 @@
-# CHANGELOG for the F-FEE TUI Project
+ # CHANGELOG for the F-FEE TUI Project
+
+## Version 0.1.13 — 03/09/2024
+
+- Implemented the commanding of the AEB mode/state
+- Monitoring is now done based on the DEB and AEB HK data instead of the register map (which might be wrong when synchronisation problems occur)
+- Again, fixed a bug in the AEB ON/OFF state setting
 
 ## Version 0.1.12 — 02/09/2024
 
