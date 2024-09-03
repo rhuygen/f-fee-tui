@@ -20,7 +20,6 @@ from egse.setup import load_setup
 from egse.zmq import MessageIdentifier
 
 from .messages import AebStateChanged
-from .messages import AebPowerChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
 from .messages import TimeoutReached
@@ -126,30 +125,36 @@ class Monitor(threading.Thread):
     def handle_messages(self, sync_id, data, setup):
 
         if sync_id == MessageIdentifier.F_FEE_REGISTER_MAP:
+            ...
+            # Since the Register Map might not be properly synchronised with the F-FEE
+            # we now temporarily disable mode and state updates based on the register map.
 
-            register_map, _ = data
-            register_map = RegisterMap("F-FEE", memory_map=register_map)
-
-            deb_mode = f_fee_mode(register_map["DEB_DTC_FEE_MOD", "OPER_MOD"])
-
-            if deb_mode != self.previous_deb_mode:
-                self._app.post_message(DebModeChanged(deb_mode))
-                self.previous_deb_mode = deb_mode
-
-            # for aeb_id in "AEB1", "AEB2", "AEB3", "AEB4":
-            for aeb_nr in (1, 2, 3, 4):
-                aeb_state_type = f"aeb{aeb_nr}_onoff"
-                aeb_power_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
-                if aeb_power_state != self.previous_aeb_state.get(aeb_state_type, 0):
-                    self._app.post_message(AebPowerChanged(aeb_state_type, aeb_power_state))
-                    self.previous_aeb_state[aeb_state_type] = aeb_power_state
+            # register_map, _ = data
+            # register_map = RegisterMap("F-FEE", memory_map=register_map)
+            #
+            # deb_mode = f_fee_mode(register_map["DEB_DTC_FEE_MOD", "OPER_MOD"])
+            #
+            # if deb_mode != self.previous_deb_mode:
+            #     self._app.post_message(DebModeChanged(deb_mode))
+            #     self.previous_deb_mode = deb_mode
+            #
+            # # for aeb_id in "AEB1", "AEB2", "AEB3", "AEB4":
+            # for aeb_nr in (1, 2, 3, 4):
+            #     aeb_state_type = f"aeb{aeb_nr}_onoff"
+            #     aeb_power_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
+            #     if aeb_power_state != self.previous_aeb_state.get(aeb_state_type, 0):
+            #         self._app.post_message(AebStateChanged(aeb_state_type, aeb_power_state))
+            #         self.previous_aeb_state[aeb_state_type] = aeb_power_state
 
         elif sync_id == MessageIdentifier.SYNC_HK_DATA:
 
             cmd, aeb_id, data, timestamp = data
 
             if cmd == 'command_deb_read_hk':
-                ...
+                hk_data = HousekeepingData("DEB", data, setup)
+                deb_mode = f_fee_mode(hk_data["STATUS", "OPER_MODE"])
+                self._app.log(f"DEB_MODE = {deb_mode.name}")
+                self._app.post_message(DebModeChanged(deb_mode))
             elif cmd == 'command_aeb_read_hk':
                 aeb_id = aeb_id[0]  # this comes from the args, so it's a list
                 hk_data = HousekeepingData(aeb_id, data, setup)
@@ -158,7 +163,9 @@ class Monitor(threading.Thread):
 
                 # Power in handled by the DEB_DTC_AEB_ONOFF state from the DEB register map above.
 
-                if aeb_status == aeb_state.INIT:
+                if aeb_status == aeb_state.OFF:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_onoff", False))
+                elif aeb_status == aeb_state.INIT:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
                 elif aeb_status == aeb_state.CONFIG:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))
