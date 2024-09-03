@@ -16,14 +16,6 @@ class AebStateChanged(Message):
         self.aeb_state = aeb_state
 
 
-class AebPowerChanged(Message):
-    """This message reports on the Power of the AEBs. This is the DEB_DTC_AEB_ONOFF register setting."""
-    def __init__(self, aeb_state_type, aeb_state):
-        super().__init__()
-        self.aeb_state_type = aeb_state_type
-        self.aeb_state = aeb_state
-
-
 class ExceptionCaught(Message):
     """This message is sent whenever a non-resolvable exception occurs in the Monitor or Commanding thread."""
     def __init__(self, exc: Exception, tb=None):
