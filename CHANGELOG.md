@@ -1,5 +1,10 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.14 — 04/09/2024
+
+- Added --version commandline option
+- Fixed a typo OPER_MODE -> OPER_MOD
+
 ## Version 0.1.13 — 03/09/2024
 
 - Implemented the commanding of the AEB mode/state
