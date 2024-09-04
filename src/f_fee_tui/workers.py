@@ -152,7 +152,7 @@ class Monitor(threading.Thread):
 
             if cmd == 'command_deb_read_hk':
                 hk_data = HousekeepingData("DEB", data, setup)
-                deb_mode = f_fee_mode(hk_data["STATUS", "OPER_MODE"])
+                deb_mode = f_fee_mode(hk_data["STATUS", "OPER_MOD"])
                 self._app.log(f"DEB_MODE = {deb_mode.name}")
                 self._app.post_message(DebModeChanged(deb_mode))
             elif cmd == 'command_aeb_read_hk':
