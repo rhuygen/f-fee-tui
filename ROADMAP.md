@@ -17,6 +17,7 @@
 
 - [ ] Implement Set FPGA defaults
 - [ ] Implement Sync register map
+- [x] Fully implement the Immediate ON Sequence
 
 ### AEB Mode
 
