@@ -1,3 +1,4 @@
+import asyncio
 import platform
 import re
 from queue import Queue
@@ -87,8 +88,12 @@ class FastFEEApp(App):
         self._command_q.put_nowait(("DPU", "deb_set_on_mode", [], {}))
 
     @on(Button.Pressed, "#btn-deb-immediate-on")
-    def command_deb_to_immediate_on(self):
+    async def command_deb_to_immediate_on(self):
         self._command_q.put_nowait(("DPU", "deb_set_immediate_on", [], {}))
+        for aeb_id in "AEB1", "AEB2", "AEB3", "AEB4":
+            self._command_q.put_nowait(("DPU", "aeb_set_init_mode", [aeb_id], {}))
+        await asyncio.sleep(6.0)
+        self._command_q.put_nowait(("DPU", "deb_set_aeb_power_off", [True, True, True, True], {}))
 
     @on(Button.Pressed, "#btn-deb-standby")
     def command_deb_to_standby_mode(self):
