@@ -53,14 +53,14 @@ DEBCommand Button {
 AEBState {
 
     layout: grid;
-    grid-size: 6 5;
+    grid-size: 8 5;
     grid-rows: 2;
     grid-gutter: 0;
 
     background: $boost;
 
     height: 15;
-    width: 60;
+    width: 84;
     margin: 1;
     padding: 0 1;
 

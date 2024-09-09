@@ -167,6 +167,10 @@ class Monitor(threading.Thread):
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_onoff", False))
                 elif aeb_status == aeb_state.INIT:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
+                elif aeb_status == aeb_state.POWER_UP:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_power_up", True))
+                elif aeb_status == aeb_state.POWER_DOWN:
+                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_power_down", True))
                 elif aeb_status == aeb_state.CONFIG:
                     self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))
                 elif aeb_status == aeb_state.IMAGE:
