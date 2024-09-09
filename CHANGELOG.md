@@ -1,5 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.15 — 09/09/2024
+
+- Added POWER-UP and POWER-DOWN states for the AEB State widget
+
 ## Version 0.1.14 — 04/09/2024
 
 - Added --version commandline option

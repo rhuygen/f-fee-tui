@@ -25,7 +25,7 @@
 ### AEB Commanding
 
 - [x] Implement AEB Power ON/OFF commands
-- [ ] Implement AEB mode changing commands
+- [x] Implement AEB mode changing commands
 
 ### Running an SFT
 
