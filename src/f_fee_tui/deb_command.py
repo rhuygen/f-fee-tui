@@ -29,7 +29,9 @@ BTN_DEB_IMMEDIATE_ON = """
 Press this button to bring the F-FEE immediately into ON mode.
 
 The DEB will return to ON mode immediately, regardless of the mode it is in. 
-The AEBs will return to INIT state and power down the CCDs and the VASP. 
+The AEBs will return to INIT state and power down the CCDs and the VASP.
+
+Then, the AEBs will be Powered OFF.
 """
 
 class DEBCommand(Static):
