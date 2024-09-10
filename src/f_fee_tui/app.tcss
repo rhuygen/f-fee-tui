@@ -112,6 +112,23 @@ AEBCommand {
 
 }
 
+GeneralCommand {
+
+    layout: vertical;
+    background: $boost;
+
+    height: 15;
+    width: 1fr;
+    margin: 1;
+    padding: 1 1;
+
+    border: round grey;
+
+    border-title-color: grey;
+    border-title-style: bold;
+
+}
+
 OnOffLedWithLabel {
     layout: horizontal;
     height: 1;

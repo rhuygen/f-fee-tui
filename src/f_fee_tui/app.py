@@ -1,9 +1,9 @@
 import asyncio
 import platform
-import re
 from queue import Queue
 
 from textual import on
+from textual import work
 from textual.app import App
 from textual.app import ComposeResult
 from textual.containers import Horizontal
@@ -16,6 +16,7 @@ from .aeb_state import AEBState
 from .aeb_state import get_aeb_nr
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
+from .general_command import GeneralCommand
 from .messages import AebStateChanged
 from .messages import DebModeChanged
 from .messages import ExceptionCaught
@@ -31,6 +32,7 @@ class FastFEEApp(App):
     CSS_PATH = "app.tcss"
 
     BINDINGS = [
+        ("q", "quit", "Quit"),
         ("d", "toggle_dark", "Toggle dark mode"),
     ]
 
@@ -54,6 +56,7 @@ class FastFEEApp(App):
         with Horizontal():
             yield DEBCommand()
             yield AEBCommand()
+            yield GeneralCommand()
 
     def on_mount(self) -> None:
         self._monitoring_thread.start()
@@ -70,6 +73,9 @@ class FastFEEApp(App):
 
         aeb_command_widget = self.query_one(AEBCommand)
         aeb_command_widget.border_title = "AEB Commanding"
+
+        general_command_widget = self.query_one(GeneralCommand)
+        general_command_widget.border_title = "General Commanding"
 
 
     def on_unmount(self) -> None:
@@ -106,6 +112,33 @@ class FastFEEApp(App):
     @on(Button.Pressed, "#btn-deb-full-image-pattern")
     def command_deb_to_full_image_pattern_mode(self):
         self._command_q.put_nowait(("DPU", "deb_set_full_image_pattern_mode", [], {}))
+
+    @on(Button.Pressed, "#btn-set-fpga-defaults")
+    async def command_set_fpga_defaults(self):
+        self.set_fpga_defaults()
+
+    @work()
+    async def set_fpga_defaults(self):
+        self.query_one("DEBCommand").disabled = True
+        self.query_one("AEBCommand").disabled = True
+
+        self.notify("Set FPGA defaults for the DEB")
+        self._command_q.put_nowait(("DPU", "set_fpga_defaults", ['DEB'], {}))
+
+        power_on_sequence = [False, False, False, False]
+        for idx, aeb_id in enumerate(('AEB1', 'AEB2', 'AEB3', 'AEB4')):
+            power_on_sequence[idx] = True
+            # self.notify(f"Power ON the {aeb_id}")
+            self._command_q.put_nowait(("DPU", "deb_set_aeb_power_on", power_on_sequence, {}))
+
+            await asyncio.sleep(2.5)
+
+        for unit in 'AEB1', 'AEB2', 'AEB3', 'AEB4':
+            self.notify(f"Set FPGA defaults for the {unit}")
+            self._command_q.put_nowait(("DPU", "set_fpga_defaults", [unit], {}))
+
+        self.query_one("DEBCommand").disabled = False
+        self.query_one("AEBCommand").disabled = False
 
     @on(Button.Pressed, ".command.aeb.power")
     def command_aeb_power(self, message: Button.Pressed):
