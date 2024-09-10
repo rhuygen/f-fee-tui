@@ -3,6 +3,7 @@
 ## Version 0.1.17 — 10/09/2024
 
 - Added a general command TAB with a button to set the FPGA defaults.
+- Hitting 'q' will now also quit the app.
 
 ## Version 0.1.16 — 09/09/2024
 
