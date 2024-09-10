@@ -1,5 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.1.17 — 10/09/2024
+
+- Added a general command TAB with a button to set the FPGA defaults.
+
 ## Version 0.1.16 — 09/09/2024
 
 - The IMMEDIATE ON commands now implements the Immediate ON Sequence (Section 9.2 in F-FEE CD ICD v2.6). It will bring the DEB to ON mode, then command the AEBs to INIT mode, wait for 6.0s, then Power OFF the AEBs.
