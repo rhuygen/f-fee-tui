@@ -1,5 +1,10 @@
  # CHANGELOG for the F-FEE TUI Project
 
+
+## Version 0.2.0 — 20/09/2024
+
+- Introduce monitoring and reporting of the DTC_IN_MOD settings in a new monitoring panel
+
 ## Version 0.1.17 — 10/09/2024
 
 - Added a general command TAB with a button to set the FPGA defaults.
