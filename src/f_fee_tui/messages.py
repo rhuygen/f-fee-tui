@@ -16,6 +16,20 @@ class AebStateChanged(Message):
         self.aeb_state = aeb_state
 
 
+class DtcInModChanged(Message):
+    """This message reports on the State of the AEBs."""
+    def __init__(self, t0, t1, t2, t3, t4, t5, t6, t7):
+        super().__init__()
+        self.t0 = t0
+        self.t1 = t1
+        self.t2 = t2
+        self.t3 = t3
+        self.t4 = t4
+        self.t5 = t5
+        self.t6 = t6
+        self.t7 = t7
+
+
 class ExceptionCaught(Message):
     """This message is sent whenever a non-resolvable exception occurs in the Monitor or Commanding thread."""
     def __init__(self, exc: Exception, tb=None):

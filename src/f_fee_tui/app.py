@@ -16,9 +16,11 @@ from .aeb_state import AEBState
 from .aeb_state import get_aeb_nr
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
+from .dtc_in_mod import DtcInMod
 from .general_command import GeneralCommand
 from .messages import AebStateChanged
 from .messages import DebModeChanged
+from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import ProblemDetected
 from .messages import TimeoutReached
@@ -53,6 +55,7 @@ class FastFEEApp(App):
         with Horizontal():
             yield DEBMode()
             yield AEBState()
+            yield DtcInMod()
         with Horizontal():
             yield DEBCommand()
             yield AEBCommand()
@@ -70,6 +73,9 @@ class FastFEEApp(App):
 
         aeb_state_widget = self.query_one(AEBState)
         aeb_state_widget.border_title = "AEB State"
+
+        in_mod_widget = self.query_one(DtcInMod)
+        in_mod_widget.border_title = "DTC IN_MOD"
 
         aeb_command_widget = self.query_one(AEBCommand)
         aeb_command_widget.border_title = "AEB Commanding"
@@ -125,10 +131,11 @@ class FastFEEApp(App):
         self.notify("Set FPGA defaults for the DEB")
         self._command_q.put_nowait(("DPU", "set_fpga_defaults", ['DEB'], {}))
 
+        await asyncio.sleep(2.5)
+
         power_on_sequence = [False, False, False, False]
         for idx, aeb_id in enumerate(('AEB1', 'AEB2', 'AEB3', 'AEB4')):
             power_on_sequence[idx] = True
-            # self.notify(f"Power ON the {aeb_id}")
             self._command_q.put_nowait(("DPU", "deb_set_aeb_power_on", power_on_sequence, {}))
 
             await asyncio.sleep(2.5)
@@ -239,6 +246,10 @@ class FastFEEApp(App):
 
         # Should only notify if new state != old state
         # self.notify(f"AEB State changed: {aeb_state_type}, {aeb_state}")
+
+    def on_dtc_in_mod_state_changed(self, message: DtcInModChanged):
+        dtc_in_mod_state_widget = self.query_one(DtcInMod)
+        dtc_in_mod_state_widget.set_state(message)
 
     def on_exception_caught(self, message: ExceptionCaught):
         self.log(str(message.exc))

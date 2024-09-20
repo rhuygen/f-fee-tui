@@ -21,6 +21,7 @@ from egse.zmq import MessageIdentifier
 
 from .messages import AebStateChanged
 from .messages import DebModeChanged
+from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import TimeoutReached
 
@@ -125,26 +126,24 @@ class Monitor(threading.Thread):
     def handle_messages(self, sync_id, data, setup):
 
         if sync_id == MessageIdentifier.F_FEE_REGISTER_MAP:
-            ...
-            # Since the Register Map might not be properly synchronised with the F-FEE
-            # we now temporarily disable mode and state updates based on the register map.
 
-            # register_map, _ = data
-            # register_map = RegisterMap("F-FEE", memory_map=register_map)
-            #
-            # deb_mode = f_fee_mode(register_map["DEB_DTC_FEE_MOD", "OPER_MOD"])
-            #
-            # if deb_mode != self.previous_deb_mode:
-            #     self._app.post_message(DebModeChanged(deb_mode))
-            #     self.previous_deb_mode = deb_mode
-            #
-            # # for aeb_id in "AEB1", "AEB2", "AEB3", "AEB4":
-            # for aeb_nr in (1, 2, 3, 4):
-            #     aeb_state_type = f"aeb{aeb_nr}_onoff"
-            #     aeb_power_state = register_map["DEB_DTC_AEB_ONOFF", f"AEB_IDX{aeb_nr}"]
-            #     if aeb_power_state != self.previous_aeb_state.get(aeb_state_type, 0):
-            #         self._app.post_message(AebStateChanged(aeb_state_type, aeb_power_state))
-            #         self.previous_aeb_state[aeb_state_type] = aeb_power_state
+            # How can we be sure the Register Map is properly synchronised with the F-FEE?
+
+            register_map, _ = data
+            register_map = RegisterMap("F-FEE", memory_map=register_map, setup=setup)
+
+            t0 = register_map["DEB_DTC_IN_MOD_2", "T0_IN_MOD"]
+            t1 = register_map["DEB_DTC_IN_MOD_2", "T1_IN_MOD"]
+            t2 = register_map["DEB_DTC_IN_MOD_2", "T2_IN_MOD"]
+            t3 = register_map["DEB_DTC_IN_MOD_2", "T3_IN_MOD"]
+            t4 = register_map["DEB_DTC_IN_MOD_1", "T4_IN_MOD"]
+            t5 = register_map["DEB_DTC_IN_MOD_1", "T5_IN_MOD"]
+            t6 = register_map["DEB_DTC_IN_MOD_1", "T6_IN_MOD"]
+            t7 = register_map["DEB_DTC_IN_MOD_1", "T7_IN_MOD"]
+
+            self._app.log(f"{t0=}, {t1=}, {t2=}, {t3=}, {t4=}, {t5=}, {t6=}, {t7=}")
+
+            self._app.post_message(DtcInModChanged(t0, t1, t2, t3, t4, t5, t6, t7))
 
         elif sync_id == MessageIdentifier.SYNC_HK_DATA:
 

@@ -112,6 +112,52 @@ AEBCommand {
 
 }
 
+DtcInMod {
+    layout: grid;
+
+    grid-size: 9 6;
+    grid-rows: 1;
+    grid-gutter: 1;
+
+    height: 15;
+    width: 1fr;
+    margin: 1;
+    padding: 0 1;
+
+    background: $boost;
+
+    border: round grey;
+
+    border-title-color: grey;
+    border-title-style: bold;
+
+    .two-cols {
+        column-span: 2;
+        text-align: center;
+        background: $boost 0%;
+        width: 1fr;
+    }
+
+    .one-col {
+        text-align: center;
+        background: grey 25%;
+        width: 1fr;
+    }
+
+    .disabled {
+        background: $boost 25%;
+    }
+
+    .footer {
+        background: $boost 0%;
+    }
+
+    .header {
+        border-right: vkey grey;
+        width: 1fr;
+    }
+}
+
 GeneralCommand {
 
     layout: vertical;
