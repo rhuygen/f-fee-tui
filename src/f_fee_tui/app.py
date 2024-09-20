@@ -247,9 +247,9 @@ class FastFEEApp(App):
         # Should only notify if new state != old state
         # self.notify(f"AEB State changed: {aeb_state_type}, {aeb_state}")
 
-    def on_dtc_in_mod_state_changed(self, message: DtcInModChanged):
-        dtc_in_mod_state_widget = self.query_one(DtcInMod)
-        dtc_in_mod_state_widget.set_state(message)
+    def on_dtc_in_mod_changed(self, message: DtcInModChanged):
+        dtc_in_mod_widget = self.query_one(DtcInMod)
+        dtc_in_mod_widget.set_state(message)
 
     def on_exception_caught(self, message: ExceptionCaught):
         self.log(str(message.exc))
