@@ -87,7 +87,7 @@ AEBCommand {
     background: $boost;
 
     height: 15;
-    width: 1fr;
+    width: 1.5fr;
     margin: 1;
     padding: 0 1;
 
@@ -192,4 +192,15 @@ OnOffLedWithLabel OnOffLed {
     width: 2;
     text-align: center;
     dock: right
+}
+
+InfoBar {
+    height: 2;
+    dock: bottom;
+    Label {
+        margin: 0 1 0 0;
+    }
+    .status {
+        border-right: vkey grey;
+    }
 }

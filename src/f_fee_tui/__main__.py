@@ -1,5 +1,4 @@
 import argparse
-import importlib
 import textwrap
 
 from f_fee_tui.app import FastFEEApp
@@ -8,18 +7,6 @@ from f_fee_tui.app import FastFEEApp
 def main():
     app = FastFEEApp()
     app.run()
-
-
-def get_version():
-
-    from importlib.metadata import version, PackageNotFoundError
-
-    try:
-        version = version("f_fee_tui")
-    except PackageNotFoundError as exc:
-        version = None
-
-    return version
 
 
 if __name__ == "__main__":
@@ -42,6 +29,8 @@ if __name__ == "__main__":
         """),
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
+
+    from f_fee_tui._version import get_version
 
     version = get_version()
     parser.add_argument('--version', action='version', version=f'f-fee-tui {version=}')
