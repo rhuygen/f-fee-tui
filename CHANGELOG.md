@@ -1,9 +1,13 @@
  # CHANGELOG for the F-FEE TUI Project
 
-## Version 0.2.1 — 22/09/2024
+## Version 0.3.0 — 22/09/2024
 
 - Added an info bar at the bottom of the screen with status LEDs for the core services and some important other processes. 
 - Added a help screen behind the F1 key. Further help needs to be written.
+
+## Version 0.2.1 — 20/09/2024
+
+- fix name of message handling function: on_dtc_in_mod_changed()
 
 ## Version 0.2.0 — 20/09/2024
 
