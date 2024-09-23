@@ -17,3 +17,8 @@ $ python -m pip install f-fee-tui
 ## Screenshots
 
 ![](https://raw.githubusercontent.com/rhuygen/f-fee-tui/develop/images/screenshot-01.png)
+
+
+## Credits
+
+- Many thanks to the awesome [Textual](https://textual.textualize.io) project.
