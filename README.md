@@ -12,3 +12,8 @@ Install the project in the virtual environment that you have set up for the CGSE
 ```bash
 $ python -m pip install f-fee-tui
 ```
+
+
+## Screenshots
+
+![](https://raw.githubusercontent.com/rhuygen/f-fee-tui/develop/images/screenshot-01.png)
