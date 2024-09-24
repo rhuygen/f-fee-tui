@@ -115,7 +115,7 @@ AEBCommand {
 DtcInMod {
     layout: grid;
 
-    grid-size: 9 6;
+    grid-size: 9 7;
     grid-rows: 1;
     grid-gutter: 1;
 
@@ -150,11 +150,23 @@ DtcInMod {
 
     .footer {
         background: $boost 0%;
+        width: 1fr;
     }
 
     .header {
         border-right: vkey grey;
         width: 1fr;
+    }
+
+    Sparkline {
+        column-span: 8;
+    }
+
+    #frame-errors > .sparkline--max-color {
+        color: red;
+    }
+    #frame-errors > .sparkline--min-color {
+        color: $boost;
     }
 }
 

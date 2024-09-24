@@ -18,6 +18,7 @@ from textual.screen import Screen
 from textual.widgets import Button
 from textual.widgets import Footer
 from textual.widgets import Header
+from textual.widgets import Sparkline
 
 from .aeb_command import AEBCommand
 from .aeb_state import AEBState
@@ -33,6 +34,7 @@ from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import ProblemDetected
 from .messages import TimeoutReached
+from .messages import OutbuffChanged
 from .services import handle_multi_part
 from .services import handle_single_part
 from .services import services
@@ -258,6 +260,9 @@ class MasterScreen(Screen):
         # Should only notify if new state != old state
         # from egse.fee.ffee import f_fee_mode
         # self.notify(f"F-FEE set to {f_fee_mode(mode).name}")
+
+    def on_outbuff_changed(self, message: OutbuffChanged):
+        self.query_one("#frame-errors", Sparkline).data = message.outbuff
 
     def on_aeb_state_changed(self, message: AebStateChanged):
         aeb_state: bool = message.aeb_state

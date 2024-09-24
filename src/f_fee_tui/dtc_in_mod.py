@@ -2,6 +2,7 @@ import itertools
 
 from textual.app import ComposeResult
 from textual.widgets import Label
+from textual.widgets import Sparkline
 from textual.widgets import Static
 
 from f_fee_tui.messages import DtcInModChanged
@@ -73,7 +74,7 @@ class DtcInMod(Static):
         yield Label("", id="T7-001", classes="one-col")    # AEB4-E
         yield Label("", id="T6-001", classes="one-col")    # AEB4-F
 
-        yield Label("")
+        yield Label("", classes="footer")
         yield Label("E", classes="one-col footer")
         yield Label("F", classes="one-col footer")
         yield Label("E", classes="one-col footer")
@@ -82,6 +83,14 @@ class DtcInMod(Static):
         yield Label("F", classes="one-col footer")
         yield Label("E", classes="one-col footer")
         yield Label("F", classes="one-col footer")
+
+        yield Label("Errors", id="lbl-frame-errors")
+        yield Sparkline([0, 0, 0, 0, 0, 0, 0, 0], id="frame-errors")
+
+    def on_mount(self) -> None:
+        tooltip_msg = "Accumulated errors on SpW transmit buffer overflow."
+        self.query_one("#lbl-frame-errors", Label).tooltip = tooltip_msg
+        self.query_one("#frame-errors", Sparkline).tooltip = tooltip_msg
 
     def set_state(self, state: DtcInModChanged):
         self.log(f"{state.t0=}, {state.t1=}, {state.t2=}, {state.t3=}, {state.t4=}, {state.t5=}, {state.t6=}, {state.t7=}")

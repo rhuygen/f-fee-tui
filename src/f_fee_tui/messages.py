@@ -30,6 +30,12 @@ class DtcInModChanged(Message):
         self.t7 = t7
 
 
+class OutbuffChanged(Message):
+    def __init__(self, outbuff):
+        super().__init__()
+        self.outbuff = outbuff
+
+
 class ExceptionCaught(Message):
     """This message is sent whenever a non-resolvable exception occurs in the Monitor or Commanding thread."""
     def __init__(self, exc: Exception, tb=None):

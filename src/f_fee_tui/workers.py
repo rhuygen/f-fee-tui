@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import pickle
 import queue
+import random
 import threading
 import time
 import traceback
@@ -23,6 +24,7 @@ from .messages import AebStateChanged
 from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
+from .messages import OutbuffChanged
 from .messages import TimeoutReached
 
 if TYPE_CHECKING:
@@ -79,6 +81,7 @@ class Monitor(threading.Thread):
 
         self.previous_deb_mode = f_fee_mode.ON_MODE
         self.previous_aeb_state = {}
+        self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
 
         super().__init__()
 
@@ -154,6 +157,12 @@ class Monitor(threading.Thread):
                 deb_mode = f_fee_mode(hk_data["STATUS", "OPER_MOD"])
                 self._app.log(f"DEB_MODE = {deb_mode.name}")
                 self._app.post_message(DebModeChanged(deb_mode))
+                outbuff = [hk_data["OVF", f"OUTBUFF_{x}"] for x in range(1, 9)]
+                # outbuff = random.choices([0, 1], k=8)
+                self._app.log(f"{outbuff = }")
+                if any(outbuff):
+                    self.accumulated_outbuff = [x + y for x, y in zip(self.accumulated_outbuff, outbuff)]
+                    self._app.post_message(OutbuffChanged(self.accumulated_outbuff))
             elif cmd == 'command_aeb_read_hk':
                 aeb_id = aeb_id[0]  # this comes from the args, so it's a list
                 hk_data = HousekeepingData(aeb_id, data, setup)
