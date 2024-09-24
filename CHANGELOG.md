@@ -1,5 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.4.0 — 24/09/2024
+
+- Added a sparkline to the DTC_IN_MOD panel with accumulated errors on the SpW transmit buffer.
+
 ## Version 0.3.0 — 22/09/2024
 
 - Added an info bar at the bottom of the screen with status LEDs for the core services and some important other processes. 
