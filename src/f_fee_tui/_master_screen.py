@@ -263,6 +263,7 @@ class MasterScreen(Screen):
 
     def on_outbuff_changed(self, message: OutbuffChanged):
         self.query_one("#frame-errors", Sparkline).data = message.outbuff
+        self.query_one("#frame-errors", Sparkline).tooltip = str(message.outbuff)
 
     def on_aeb_state_changed(self, message: AebStateChanged):
         aeb_state: bool = message.aeb_state
