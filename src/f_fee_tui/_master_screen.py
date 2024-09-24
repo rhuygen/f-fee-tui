@@ -11,6 +11,9 @@ from textual import on
 from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
+from textual.command import Hit
+from textual.command import Hits
+from textual.command import Provider
 from textual.containers import Horizontal
 from textual.containers import Vertical
 from textual.css.query import NoMatches
@@ -32,9 +35,9 @@ from .messages import AebStateChanged
 from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
+from .messages import OutbuffChanged
 from .messages import ProblemDetected
 from .messages import TimeoutReached
-from .messages import OutbuffChanged
 from .services import handle_multi_part
 from .services import handle_single_part
 from .services import services
@@ -45,11 +48,31 @@ for handler in logging.getLogger().handlers:
     handler.setLevel(100)  # no logging levels to the screen
 
 
+class ResetErrorsCommand(Provider):
+    async def search(self, query: str) -> Hits:
+        command = "Reset frame errors"
+        matcher = self.matcher(query)
+        score = matcher.match(command)
+
+        self.app.log(f"{score = }")
+
+        master_screen: MasterScreen = self.app.get_screen("master")
+
+        yield Hit(
+            score,
+            matcher.highlight(command),
+            master_screen.reset_frame_errors,
+            help="Clear the Sparkline that holds the accumulated frame errors.",
+        )
+
+
 class MasterScreen(Screen):
 
     BINDINGS = [
         Binding("ctrl+k", "toggle_commanding", "Toggle Commanding", show=False),
     ]
+
+    COMMANDS = [ResetErrorsCommand]
 
     def __init__(self):
         super().__init__()
@@ -118,6 +141,9 @@ class MasterScreen(Screen):
         self._commanding_thread.cancel()
         if self._commanding_thread.is_alive():
             self._commanding_thread.join()
+
+    def reset_frame_errors(self):
+        self._monitoring_thread.reset_frame_errors()
 
     @on(Button.Pressed, "#btn-deb-on")
     def command_deb_to_on_mode(self):

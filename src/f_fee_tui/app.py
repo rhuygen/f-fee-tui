@@ -1,8 +1,8 @@
 from textual.app import App
 from textual.binding import Binding
 
-from f_fee_tui._master_screen import MasterScreen
 from f_fee_tui._help_screen import HelpScreen
+from f_fee_tui._master_screen import MasterScreen
 
 
 class FastFEEApp(App):

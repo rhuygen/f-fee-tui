@@ -76,6 +76,8 @@ class Monitor(threading.Thread):
     def __init__(self, app: 'FastFEEApp') -> None:
         self._app = app
         self._canceled = threading.Event()
+        self._reset_frame_errors = threading.Event()
+
         self.hostname = dpu.HOSTNAME
         self.port = dpu.DATA_DISTRIBUTION_PORT
 
@@ -102,6 +104,10 @@ class Monitor(threading.Thread):
         while True:
             if self._canceled.is_set():
                 break
+            if self._reset_frame_errors.is_set():
+                self._reset_frame_errors.clear()
+                self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
+                self._app.post_message(OutbuffChanged(self.accumulated_outbuff))
 
             socket_list, _, _ = zmq.select([receiver], [], [], timeout=1.0)
 
@@ -127,6 +133,9 @@ class Monitor(threading.Thread):
 
     def cancel(self) -> None:
         self._canceled.set()
+
+    def reset_frame_errors(self):
+        self._reset_frame_errors.set()
 
     def handle_messages(self, sync_id, data, setup):
 
