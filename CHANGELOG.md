@@ -1,5 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.4.1 — 24/09/2024
+
+- Put `outbuff` accumulated values in Sparkline tooltip.
+
 ## Version 0.4.0 — 24/09/2024
 
 - Added a sparkline to the DTC_IN_MOD panel with accumulated errors on the SpW transmit buffer.
