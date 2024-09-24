@@ -1,5 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.4.3 — 24/09/2024
+
+- Added the command 'Reset frame errors' to the command palette.
+
 ## Version 0.4.2 — 24/09/2024
 
 - Fix the mapping of OUTBUFF_x to AEB/DTC_IN_MOD. This is what is contained in the Setup in `camera.fee.ccd_numbering.AEB_TO_T_IN_MOD`
