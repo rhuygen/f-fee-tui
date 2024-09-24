@@ -82,6 +82,8 @@ class Monitor(threading.Thread):
         self.previous_deb_mode = f_fee_mode.ON_MODE
         self.previous_aeb_state = {}
         self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
+        self.outbuff_mapping = [0, 2, 1, 3, 4, 6, 5, 7]
+        """Mapping of the OUTBUFF_x and the DTC_IN_MOD, se Setup AEB_TO_T_IN_MOD"""
 
         super().__init__()
 
@@ -161,6 +163,9 @@ class Monitor(threading.Thread):
                 # outbuff = random.choices([0, 1], k=8)
                 self._app.log(f"{outbuff = }")
                 if any(outbuff):
+                    # re-order outbuff to match with DTC_IN_MOD
+                    outbuff = [outbuff[idx] for idx in self.outbuff_mapping]
+                    # update the accumulated values for OUTBUFF
                     self.accumulated_outbuff = [x + y for x, y in zip(self.accumulated_outbuff, outbuff)]
                     self._app.post_message(OutbuffChanged(self.accumulated_outbuff))
             elif cmd == 'command_aeb_read_hk':
