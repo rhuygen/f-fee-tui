@@ -35,20 +35,20 @@ class DtcInMod(Static):
         yield Label("AEB4", classes="two-cols header")
 
         yield Label("SpW 1")
-        yield Label("", id="T1-001", classes="one-col")    # AEB1-E
         yield Label("", id="T0-001", classes="one-col")    # AEB1-F
-        yield Label("", classes="one-col disabled")
+        yield Label("", id="T1-001", classes="one-col")    # AEB1-E
         yield Label("", id="T1-010", classes="one-col")    # AEB2-F
+        yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
 
         yield Label("SpW 2")
-        yield Label("", id="T2-010", classes="one-col")    # AEB1-E
         yield Label("", classes="one-col disabled")
-        yield Label("", id="T3-001", classes="one-col")    # AEB2-E
+        yield Label("", id="T2-010", classes="one-col")    # AEB1-E
         yield Label("", id="T2-001", classes="one-col")    # AEB2-F
+        yield Label("", id="T3-001", classes="one-col")    # AEB2-E
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
@@ -59,20 +59,20 @@ class DtcInMod(Static):
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
-        yield Label("", id="T5-001", classes="one-col")    # AEB3-E
         yield Label("", id="T4-001", classes="one-col")    # AEB3-F
-        yield Label("", classes="one-col disabled")
+        yield Label("", id="T5-001", classes="one-col")    # AEB3-E
         yield Label("", id="T5-010", classes="one-col")    # AEB4-F
+        yield Label("", classes="one-col disabled")
 
         yield Label("SpW 4")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
         yield Label("", classes="one-col disabled")
-        yield Label("", id="T6-010", classes="one-col")    # AEB3-E
         yield Label("", classes="one-col disabled")
-        yield Label("", id="T7-001", classes="one-col")    # AEB4-E
+        yield Label("", id="T6-010", classes="one-col")    # AEB3-E
         yield Label("", id="T6-001", classes="one-col")    # AEB4-F
+        yield Label("", id="T7-001", classes="one-col")    # AEB4-E
 
         yield Label("", classes="footer")
         yield Label("F", classes="one-col footer")
