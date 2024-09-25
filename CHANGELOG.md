@@ -1,5 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.5.0 — 25/09/2024
+
+- Fixed the labeling on the DTC_IN_MOD panel, i.e. F = LEFT, E = RIGHT
+
 ## Version 0.4.3 — 24/09/2024
 
 - Added the command 'Reset frame errors' to the command palette.
