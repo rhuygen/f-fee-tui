@@ -1,8 +1,9 @@
  # CHANGELOG for the F-FEE TUI Project
 
-## Version 0.5.0 — 25/09/2024
+## Version 0.5.1 — 25/09/2024
 
-- Fixed the labeling on the DTC_IN_MOD panel, i.e. F = LEFT, E = RIGHT
+- [0.5.0] Fixed the labeling on the DTC_IN_MOD panel, i.e. F = LEFT, E = RIGHT
+- [0.5.1] Fixed the rest of the DTC_IN_MOD panel 
 
 ## Version 0.4.3 — 24/09/2024
 
