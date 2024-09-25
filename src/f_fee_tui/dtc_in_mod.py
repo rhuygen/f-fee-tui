@@ -75,7 +75,6 @@ class DtcInMod(Static):
         yield Label("", id="T6-001", classes="one-col")    # AEB4-F
 
         yield Label("", classes="footer")
-        yield Label("E", classes="one-col footer")
         yield Label("F", classes="one-col footer")
         yield Label("E", classes="one-col footer")
         yield Label("F", classes="one-col footer")
@@ -83,6 +82,7 @@ class DtcInMod(Static):
         yield Label("F", classes="one-col footer")
         yield Label("E", classes="one-col footer")
         yield Label("F", classes="one-col footer")
+        yield Label("E", classes="one-col footer")
 
         yield Label("Errors", id="lbl-frame-errors")
         yield Sparkline([0, 0, 0, 0, 0, 0, 0, 0], id="frame-errors")
