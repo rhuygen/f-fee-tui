@@ -20,4 +20,5 @@ class FastFEEApp(App):
         self.push_screen("master")
 
     def action_help(self) -> None:
-        self.app.push_screen(HelpScreen())
+        if self.screen != self.get_screen("help"):
+            self.app.push_screen(self.get_screen("help"))
