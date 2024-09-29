@@ -76,3 +76,4 @@
   - The Help panel is focus aware and displays help that is given in the HELP class variable.
 
 - [x] Add a global Help modal screen with brief explanations -> `help.md`.
+- [x] When pressing the F1 key multiple times, the help screen will be instantiated multiple times too!

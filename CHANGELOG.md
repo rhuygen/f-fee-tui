@@ -2,8 +2,9 @@
 
 ## Version 0.5.2 — 29/09/2024
 
-- In the workers Monitor class, the subscription to the data distribution channel is restricted to the RegisterMap and HK data. 
-- Updates to the in-app help.
+- [0.5.3] Make sure the Help screen is pushed / showed only once
+- [0.5.2] In the workers Monitor class, the subscription to the data distribution channel is restricted to the RegisterMap and HK data. 
+- [0.5.2] Updates to the in-app help.
 
 ## Version 0.5.1 — 25/09/2024
 
