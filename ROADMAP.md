@@ -11,11 +11,11 @@
 
 ### DEB Mode
 
-- [ ]  The DEB mode shall be updated from the DEB HK instead of the Register Map. The register map might be out of sync with the F-FEE for several reasons (mainly synchronisation issues). The DEB HK is sent on every cycle right after the timecode and accurately reflects the state of the DEB.
+- [x]  The DEB mode shall be updated from the DEB HK instead of the Register Map. The register map might be out of sync with the F-FEE for several reasons (mainly synchronisation issues). The DEB HK is sent on every cycle right after the timecode and accurately reflects the state of the DEB.
 
 ### DEB Commanding
 
-- [ ] Implement Set FPGA defaults
+- [x] Implement Set FPGA defaults
 - [ ] Implement Sync register map
 - [x] Fully implement the Immediate ON Sequence
 
@@ -38,7 +38,7 @@
 
 ## Monitoring
 
-- [x] Monitoring is a background thread that connects to the F-DPU and the DATA_DISTRIBUTION_PORT.
+- [x] Monitoring is a background thread that connects to the F-DPU and the DATA_DISTRIBUTION_PORT, subscribing to F_REGISTER_MAP and SYNC_HK_DATA.
 - [ ] Do we also need monitoring on the MONITORING_PORT?
 - [ ] Should we provide a mechanism to request updates from the monitoring at regular intervals (say 2.5s) instead of letting the Monitoring thread handle this. We could do this with the following line (add in on_mount() after starting the thread). The poll interval can be a setting of the App.
 	```python
@@ -62,7 +62,7 @@
 
 - [x] How are we going to implement commanding? In a similar background thread like Monitoring or with individual workers? -> Implemented a Commanding Thread.
 - [x] Implement AEB Power ON/OFF commanding
-- [ ] Implement AEB mode change commanding
+- [x] Implement AEB mode change commanding
 - What about non FEE related commands that are nevertheless useful?
   - start/end observation
   - 
@@ -71,5 +71,8 @@
 ## Help Panel
 
 - [ ] Add global commands to the Help panel
+  - [x] 'Reset frame errors' was addeed
   - What is a good command to add? Diagnostics?
   - The Help panel is focus aware and displays help that is given in the HELP class variable.
+
+- [x] Add a global Help modal screen with brief explanations -> `help.md`.

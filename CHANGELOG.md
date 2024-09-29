@@ -1,25 +1,29 @@
- # CHANGELOG for the F-FEE TUI Project
+# CHANGELOG for the F-FEE TUI Project
+
+## Version 0.5.2 — 29/09/2024
+
+- In the workers Monitor class, the subscription to the data distribution channel is restricted to the RegisterMap and HK data. 
+- Updates to the in-app help.
 
 ## Version 0.5.1 — 25/09/2024
+
+The definition of left and right side of the CCD have been changed from:
+
+- 1: left — E into 0: left — F
+- 0: right — F into 1: right — E
+
 
 - [0.5.0] Fixed the labeling on the DTC_IN_MOD panel, i.e. F = LEFT, E = RIGHT
 - [0.5.1] Fixed the rest of the DTC_IN_MOD panel 
 
 ## Version 0.4.3 — 24/09/2024
 
-- Added the command 'Reset frame errors' to the command palette.
+The frame errors are represented as a Sparkline at the bottom of the DTC_IN_MOD panel. It represents accumulated errors for the SpW transfer buffer overflow. The accumulation is for the entire lifetime of the app. You can reset the error count using the command 'Reset frame errors' from the command palette.
 
-## Version 0.4.2 — 24/09/2024
-
-- Fix the mapping of OUTBUFF_x to AEB/DTC_IN_MOD. This is what is contained in the Setup in `camera.fee.ccd_numbering.AEB_TO_T_IN_MOD`
-
-## Version 0.4.1 — 24/09/2024
-
-- Put `outbuff` accumulated values in Sparkline tooltip.
-
-## Version 0.4.0 — 24/09/2024
-
-- Added a sparkline to the DTC_IN_MOD panel with accumulated errors on the SpW transmit buffer.
+- [0.4.3] Added the command 'Reset frame errors' to the command palette.
+- [0.4.2] Fix the mapping of OUTBUFF_x to AEB/DTC_IN_MOD. This is what is contained in the Setup in `camera.fee.ccd_numbering.AEB_TO_T_IN_MOD`
+- [0.4.1] Put `outbuff` accumulated values in Sparkline tooltip.
+- [0.4.0] Added a sparkline to the DTC_IN_MOD panel with accumulated errors on the SpW transmit buffer.
 
 ## Version 0.3.0 — 22/09/2024
 
@@ -28,11 +32,8 @@
 
 ## Version 0.2.1 — 20/09/2024
 
-- fix name of message handling function: on_dtc_in_mod_changed()
-
-## Version 0.2.0 — 20/09/2024
-
-- Introduce monitoring and reporting of the DTC_IN_MOD settings in a new monitoring panel
+- [0.2.1] fix name of message handling function: on_dtc_in_mod_changed()
+- [0.2.0] Introduce monitoring and reporting of the DTC_IN_MOD settings in a new monitoring panel
 
 ## Version 0.1.17 — 10/09/2024
 
