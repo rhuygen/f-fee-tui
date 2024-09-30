@@ -1,7 +1,8 @@
 # CHANGELOG for the F-FEE TUI Project
 
-## Version 0.5.4 — 30/09/2024
+## Version 0.5.5 — 30/09/2024
 
+- [0.5.5] the DEB mode is now not set to ON by default at startup.
 - [0.5.4] fix a bug where I used `setsockopt_string` instead of `setsockopt`
 
 ## Version 0.5.3 — 29/09/2024
