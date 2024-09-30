@@ -8,7 +8,7 @@ class DEBMode(Static):
     """A widget to monitor the DEB mode."""
 
     def compose(self) -> ComposeResult:
-        yield OnOffLedWithLabel("ON", True, id="deb-on")
+        yield OnOffLedWithLabel("ON", False, id="deb-on")
         yield OnOffLedWithLabel("STANDBY", False, id="deb-standby")
         yield OnOffLedWithLabel("FULL_IMAGE", False, id="deb-full-image")
         yield OnOffLedWithLabel("FULL_IMAGE_PATTERN", False, id="deb-full-image-pattern")
