@@ -96,8 +96,8 @@ class Monitor(threading.Thread):
 
         context = zmq.Context.instance()
         receiver = context.socket(zmq.SUB)
-        receiver.setsockopt_string(zmq.SUBSCRIBE, MessageIdentifier.F_FEE_REGISTER_MAP.to_bytes(1, byteorder='big'))
-        receiver.setsockopt_string(zmq.SUBSCRIBE, MessageIdentifier.SYNC_HK_DATA.to_bytes(1, byteorder='big'))
+        receiver.setsockopt(zmq.SUBSCRIBE, MessageIdentifier.F_FEE_REGISTER_MAP.to_bytes(1, byteorder='big'))
+        receiver.setsockopt(zmq.SUBSCRIBE, MessageIdentifier.SYNC_HK_DATA.to_bytes(1, byteorder='big'))
         receiver.connect(f"tcp://{self.hostname}:{self.port}")
 
         setup = load_setup()
