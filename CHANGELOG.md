@@ -1,6 +1,10 @@
 # CHANGELOG for the F-FEE TUI Project
 
-## Version 0.5.2 — 29/09/2024
+## Version 0.5.4 — 30/09/2024
+
+- [0.5.4] fix a bug where I used `setsockopt_string` instead of `setsockopt`
+
+## Version 0.5.3 — 29/09/2024
 
 - [0.5.3] Make sure the Help screen is pushed / showed only once
 - [0.5.2] In the workers Monitor class, the subscription to the data distribution channel is restricted to the RegisterMap and HK data. 
