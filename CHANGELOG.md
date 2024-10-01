@@ -1,5 +1,9 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.5.6 — 01/10/2024
+
+- [0.5.6] the monitoring panels for DEB mode, AEB state, and DTC_IN_MOD will now be cleared after 10s of inactivity.
+
 ## Version 0.5.5 — 30/09/2024
 
 - [0.5.5] the DEB mode is now not set to ON by default at startup.
