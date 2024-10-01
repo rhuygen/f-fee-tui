@@ -51,6 +51,13 @@ class TimeoutReached(Message):
         self.message = msg
 
 
+class ShutdownReached(Message):
+    """This message is sent when the Monitoring reached a timeout for 5s."""
+    def __init__(self, msg: str):
+        super().__init__()
+        self.message = msg
+
+
 class ProblemDetected(Message):
     """A notification message for a problem that needs reporting."""
     def __init__(self, msg: str,):

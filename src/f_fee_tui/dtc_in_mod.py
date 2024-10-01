@@ -92,6 +92,10 @@ class DtcInMod(Static):
         self.query_one("#lbl-frame-errors", Label).tooltip = tooltip_msg
         self.query_one("#frame-errors", Sparkline).tooltip = tooltip_msg
 
+    def clear(self):
+        for id_ in ALL_IDS:
+            self.query_one(f"#{id_}", Label).update(OFF)
+
     def set_state(self, state: DtcInModChanged):
         self.log(f"{state.t0=}, {state.t1=}, {state.t2=}, {state.t3=}, {state.t4=}, {state.t5=}, {state.t6=}, {state.t7=}")
         for id_ in ALL_IDS:

@@ -25,6 +25,7 @@ from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import OutbuffChanged
+from .messages import ShutdownReached
 from .messages import TimeoutReached
 
 if TYPE_CHECKING:
@@ -84,15 +85,20 @@ class Monitor(threading.Thread):
         self.previous_deb_mode = f_fee_mode.ON_MODE
         self.previous_aeb_state = {}
         self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
+        """The total number of OUTBUFF errors since it was last reset."""
         self.outbuff_mapping = [0, 2, 1, 3, 4, 6, 5, 7]
-        """Mapping of the OUTBUFF_x and the DTC_IN_MOD, se Setup AEB_TO_T_IN_MOD"""
+        """Mapping of the OUTBUFF_x and the DTC_IN_MOD, see Setup AEB_TO_T_IN_MOD"""
 
         super().__init__()
 
     def run(self) -> None:
 
-        n_timeouts = 0
-        """The timeout is 1s, we count the number of timeouts to detect if the DPU or N-FEE might be dead or stalled."""
+        start_time = time.monotonic()
+        """Starting time for detecting a timeout or a shutdown of the data distribution channel."""
+        timeout_reported = False
+        """Flag to track if a timeout has been reported or not."""
+        shutdown_reported = False
+        """Flag to track if a shutdown has been reported or not."""
 
         context = zmq.Context.instance()
         receiver = context.socket(zmq.SUB)
@@ -110,10 +116,12 @@ class Monitor(threading.Thread):
                 self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
                 self._app.post_message(OutbuffChanged(self.accumulated_outbuff))
 
-            socket_list, _, _ = zmq.select([receiver], [], [], timeout=1.0)
+            socket_list, _, _ = zmq.select([receiver], [], [], timeout=0.1)
 
             if receiver in socket_list:
-                n_timeouts = 0
+                start_time = time.monotonic()
+                timeout_reported = False
+                shutdown_reported = False
                 try:
                     sync_id, pickle_string = receiver.recv_multipart()
                     sync_id = int.from_bytes(sync_id, byteorder='big')
@@ -123,11 +131,12 @@ class Monitor(threading.Thread):
                     tb = traceback.format_exc()
                     self._app.post_message(ExceptionCaught(exc, tb))
 
-            if len(socket_list) == 0:
-                n_timeouts += 1
-                if n_timeouts > 3:  # at least a timecode should arrive every 2.5s
-                    self._app.post_message(TimeoutReached("Timeout reached after 3s on monitoring channel."))
-                    n_timeouts = 0
+            if time.monotonic() - start_time > 6.0 and not timeout_reported:
+                self._app.post_message(TimeoutReached("Timeout reached after 6s on data distribution channel."))
+                timeout_reported = True
+            if time.monotonic() - start_time > 10.0 and not shutdown_reported:
+                self._app.post_message(ShutdownReached("Resetting the monitoring panels after 10s of inactivity."))
+                shutdown_reported = True
 
         receiver.disconnect(f"tcp://{self.hostname}:{self.port}")
         receiver.close()

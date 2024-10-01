@@ -37,6 +37,7 @@ from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import OutbuffChanged
 from .messages import ProblemDetected
+from .messages import ShutdownReached
 from .messages import TimeoutReached
 from .services import handle_multi_part
 from .services import handle_single_part
@@ -93,9 +94,9 @@ class MasterScreen(Screen):
         yield Footer()
         with Vertical():
             with Horizontal():
-                yield DEBMode()
-                yield AEBState()
-                yield DtcInMod()
+                yield DEBMode(id="deb_modes")
+                yield AEBState(id="aeb_states")
+                yield DtcInMod(id="dtc_in_mod")
             with Horizontal():
                 yield DEBCommand()
                 yield AEBCommand()
@@ -314,6 +315,12 @@ class MasterScreen(Screen):
 
     def on_timeout_reached(self, message: TimeoutReached):
         self.notify(message.message, title="Timeout")
+
+    def on_shutdown_reached(self, message: ShutdownReached):
+        self.notify(message.message, title="Shutdown")
+        self.query_one("#deb_modes", DEBMode).clear()
+        self.query_one("#aeb_states", AEBState).clear()
+        self.query_one("#dtc_in_mod", DtcInMod).clear()
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""

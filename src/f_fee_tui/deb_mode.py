@@ -14,3 +14,7 @@ class DEBMode(Static):
         yield OnOffLedWithLabel("FULL_IMAGE_PATTERN", False, id="deb-full-image-pattern")
         yield OnOffLedWithLabel("WINDOWING", False, id="deb-windowing")
         yield OnOffLedWithLabel("WINDOWING_PATTERN", False, id="deb-windowing-pattern")
+
+    def clear(self):
+        for widget in self.query(OnOffLedWithLabel):
+            widget.state = False

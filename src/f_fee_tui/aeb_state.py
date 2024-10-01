@@ -56,6 +56,16 @@ class AEBState(Static):
         yield OnOffLed(id="aeb4_image")
         yield OnOffLed(id="aeb4_pattern")
 
+    def clear(self):
+        for aeb_nr in range(1, 5):
+            self.query_one(f"#aeb{aeb_nr}_onoff", OnOffLed).state = False
+            self.query_one(f"#aeb{aeb_nr}_init", OnOffLed).state = False
+            self.query_one(f"#aeb{aeb_nr}_power_up", OnOffLed).state = False
+            self.query_one(f"#aeb{aeb_nr}_power_down", OnOffLed).state = False
+            self.query_one(f"#aeb{aeb_nr}_config", OnOffLed).state = False
+            self.query_one(f"#aeb{aeb_nr}_image", OnOffLed).state = False
+            self.query_one(f"#aeb{aeb_nr}_pattern", OnOffLed).state = False
+
     def set_state(self, aeb_state_type: str, aeb_state: bool):
 
         if (aeb_nr := get_aeb_nr(aeb_state_type)) is None:
