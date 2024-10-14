@@ -18,21 +18,14 @@ class InfoBar(Horizontal):
     }
     """
 
+    def __init__(self, id: str = None):
+        super().__init__(id=id)
+        self._names = services
+
     def compose(self) -> ComposeResult:
-        yield Label("cm_cs", id="cm_cs")
-        yield Label("🔴", id="cm_cs_active", classes="status")
-        yield Label("sm_cs", id="sm_cs")
-        yield Label("🔴", id="sm_cs_active", classes="status")
-        yield Label("pm_cs", id="pm_cs")
-        yield Label("🔴", id="pm_cs_active", classes="status")
-        yield Label("syn_cs", id="syn_cs")
-        yield Label("🔴", id="syn_cs_active", classes="status")
-        yield Label("dump", id="data_dump")
-        yield Label("🔴", id="data_dump_active", classes="status")
-        yield Label("dpu_cs", id="dpu_cs")
-        yield Label("🔴", id="dpu_cs_active", classes="status")
-        yield Label("data", id="data")
-        yield Label("🔴", id="data_active", classes="status")
+        for name in self._names:
+            yield Label(name, id=name)
+            yield Label("🔴", id=f"{name}_active", classes="status")
 
     def on_mount(self, event: events.Mount) -> None:
 

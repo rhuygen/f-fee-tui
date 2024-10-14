@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import pickle
 import queue
-import random
 import threading
 import time
 import traceback
@@ -11,6 +10,7 @@ from queue import Queue
 from typing import TYPE_CHECKING
 
 import zmq
+from egse.confman import ConfigurationManagerProxy
 from egse.dpu.fdpu import FastCameraDPUProxy
 from egse.fee.ffee import HousekeepingData
 from egse.fee.ffee import aeb_state
@@ -19,11 +19,14 @@ from egse.reg import RegisterMap
 from egse.settings import Settings
 from egse.setup import load_setup
 from egse.zmq import MessageIdentifier
+from textual.app import App
 
 from .messages import AebStateChanged
+from .messages import CommandThreadCrashed
 from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
+from .messages import LogRetrieved
 from .messages import OutbuffChanged
 from .messages import ShutdownReached
 from .messages import TimeoutReached
@@ -37,46 +40,92 @@ dpu = Settings.load("DPU Processor")
 
 
 class Command(threading.Thread):
-    def __init__(self, app: 'FastFEEApp', command_q: Queue) -> None:
+    def __init__(self, app: App, command_q: Queue) -> None:
         super().__init__()
         self._app = app
         self._command_q = command_q
         self._f_dpu: FastCameraDPUProxy | None = None
-        self._canceled = threading.Event()
+        self._cm_cs: ConfigurationManagerProxy | None = None
+        self._cancelled = threading.Event()
 
     def run(self) -> None:
 
-        with FastCameraDPUProxy() as self._f_dpu:
-            while True:
-                if self._canceled.is_set():
-                    break
-                try:
-                    target, command, args, kwargs = self._command_q.get_nowait()
-                    self.execute_command(target, command, args, kwargs)
-                    self._command_q.task_done()
-                except queue.Empty:
-                    time.sleep(0.1)  # Sleep briefly to avoid busy-waiting
-                    continue
-                except Exception as exc:
-                    _LOGGER.error(f"Caught and exception: {exc}")
-                    tb = traceback.format_exc()
-                    self._app.post_message(ExceptionCaught(exc, tb))
+        screen = self._app.get_screen("master")
+
+        # This first loop is needed to make sure the Command thread is not ended when either the FastCameraDPUProxy
+        # or the ConfigurationManagerProxy can not connect to their control server. When no connection, we wait for
+        # 10 seconds before trying again, unless the app is terminated.
+
+        while True:
+            try:
+                with FastCameraDPUProxy() as self._f_dpu, ConfigurationManagerProxy() as self._cm_cs:
+                    while True:
+                        if self._cancelled.is_set():
+                            break
+                        try:
+                            target, command, args, kwargs = self._command_q.get_nowait()
+                            self._command_q.task_done()
+                            screen.post_message(LogRetrieved(f"Executing command '{command}'"))
+                            rc = self.execute_command(target, command, args, kwargs)
+                            screen.post_message(LogRetrieved(f"Command '{command}' executed: {rc = }"))
+                        except queue.Empty:
+                            time.sleep(0.1)  # Sleep briefly to avoid busy-waiting
+                            continue
+                        except Exception as exc:
+                            _LOGGER.error(f"Caught and exception: {exc}")
+                            tb = traceback.format_exc()
+                            screen.post_message(ExceptionCaught(exc, tb))
+            except ConnectionError as exc:
+                screen.post_message(CommandThreadCrashed(exc))
+            if self.sleep_or_break(10.0):
+                break
+
+    def sleep_or_break(self, timeout: float) -> bool:
+        """
+        Returns True if the App is terminated and the cancelled flag is set, returns False after sleeping
+        for the given timeout in seconds. The idea for this function is that when we have a sleep in the
+        event loop, we still can terminate the app without having to wait the whole sleep time.
+        """
+        for _ in range(int(timeout * 10)):
+            if self._cancelled.is_set():
+                is_cancelled = True
+                break
+            time.sleep(0.1)
+        else:
+            is_cancelled = False
+
+        return True if is_cancelled else False
 
     def cancel(self) -> None:
-        self._canceled.set()
+        self._cancelled.set()
 
     def execute_command(self, target: str, command: str, args: list, kwargs: dict):
+
+        screen = self._app.get_screen("master")
+
         if target == "DPU":
             try:
-                return getattr(self._f_dpu, command)(*args, **kwargs)
+                screen.log.info(f"Running DPU command: {command}({args}, {kwargs})")
+                response = getattr(self._f_dpu, command)(*args, **kwargs)
+                screen.log.info(f"Response: {response}")
+                return response
             except AttributeError as exc:
-                _LOGGER.error(f"No such command for DPU: {command}", exc_info=True)
+                screen.log.warning(f"No such command for DPU: {command}", exc_info=True)
+
+        elif target == "CM_CS":
+            try:
+                screen.log.info(f"Running CM_CS command: {command}({args}, {kwargs})")
+                response = getattr(self._cm_cs, command)(*args, **kwargs)
+                screen.log.info(f"Response: {response}")
+                return response
+            except AttributeError as exc:
+                screen.log.warning(f"No such command for CM_CS: {command}", exc_info=True)
 
 
 class Monitor(threading.Thread):
-    def __init__(self, app: 'FastFEEApp') -> None:
+    def __init__(self, app: App) -> None:
         self._app = app
-        self._canceled = threading.Event()
+        self._cancelled = threading.Event()
         self._reset_frame_errors = threading.Event()
 
         self.hostname = dpu.HOSTNAME
@@ -108,13 +157,15 @@ class Monitor(threading.Thread):
 
         setup = load_setup()
 
+        screen = self._app.get_screen("master")
+
         while True:
-            if self._canceled.is_set():
+            if self._cancelled.is_set():
                 break
             if self._reset_frame_errors.is_set():
                 self._reset_frame_errors.clear()
                 self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
-                self._app.post_message(OutbuffChanged(self.accumulated_outbuff))
+                screen.post_message(OutbuffChanged(self.accumulated_outbuff))
 
             socket_list, _, _ = zmq.select([receiver], [], [], timeout=0.1)
 
@@ -129,25 +180,30 @@ class Monitor(threading.Thread):
                     self.handle_messages(sync_id, data, setup)
                 except Exception as exc:
                     tb = traceback.format_exc()
-                    self._app.post_message(ExceptionCaught(exc, tb))
+                    screen.post_message(ExceptionCaught(exc, tb))
 
             if time.monotonic() - start_time > 6.0 and not timeout_reported:
-                self._app.post_message(TimeoutReached("Timeout reached after 6s on data distribution channel."))
+                screen.post_message(TimeoutReached("Timeout reached after 6s on data distribution channel."))
                 timeout_reported = True
             if time.monotonic() - start_time > 10.0 and not shutdown_reported:
-                self._app.post_message(ShutdownReached("Resetting the monitoring panels after 10s of inactivity."))
+                screen.post_message(ShutdownReached("Resetting the monitoring panels after 10s of inactivity."))
                 shutdown_reported = True
 
         receiver.disconnect(f"tcp://{self.hostname}:{self.port}")
         receiver.close()
 
+        screen.post_message(LogRetrieved("Monitor Thread finished ..."))
+        screen.log.info("Monitor Thread finished ...")
+
     def cancel(self) -> None:
-        self._canceled.set()
+        self._cancelled.set()
 
     def reset_frame_errors(self):
         self._reset_frame_errors.set()
 
     def handle_messages(self, sync_id, data, setup):
+
+        screen = self._app.get_screen("master")
 
         if sync_id == MessageIdentifier.F_FEE_REGISTER_MAP:
 
@@ -165,9 +221,9 @@ class Monitor(threading.Thread):
             t6 = register_map["DEB_DTC_IN_MOD_1", "T6_IN_MOD"]
             t7 = register_map["DEB_DTC_IN_MOD_1", "T7_IN_MOD"]
 
-            self._app.log(f"{t0=}, {t1=}, {t2=}, {t3=}, {t4=}, {t5=}, {t6=}, {t7=}")
+            screen.log(f"{t0=}, {t1=}, {t2=}, {t3=}, {t4=}, {t5=}, {t6=}, {t7=}")
 
-            self._app.post_message(DtcInModChanged(t0, t1, t2, t3, t4, t5, t6, t7))
+            screen.post_message(DtcInModChanged(t0, t1, t2, t3, t4, t5, t6, t7))
 
         elif sync_id == MessageIdentifier.SYNC_HK_DATA:
 
@@ -176,36 +232,38 @@ class Monitor(threading.Thread):
             if cmd == 'command_deb_read_hk':
                 hk_data = HousekeepingData("DEB", data, setup)
                 deb_mode = f_fee_mode(hk_data["STATUS", "OPER_MOD"])
-                self._app.log(f"DEB_MODE = {deb_mode.name}")
-                self._app.post_message(DebModeChanged(deb_mode))
+                screen.log(f"DEB_MODE = {deb_mode.name}")
+                screen.post_message(DebModeChanged(deb_mode))
                 outbuff = [hk_data["OVF", f"OUTBUFF_{x}"] for x in range(1, 9)]
                 # outbuff = random.choices([0, 1], k=8)
-                self._app.log(f"{outbuff = }")
+                screen.log(f"{outbuff = }")
                 if any(outbuff):
                     # re-order outbuff to match with DTC_IN_MOD
                     outbuff = [outbuff[idx] for idx in self.outbuff_mapping]
                     # update the accumulated values for OUTBUFF
                     self.accumulated_outbuff = [x + y for x, y in zip(self.accumulated_outbuff, outbuff)]
-                    self._app.post_message(OutbuffChanged(self.accumulated_outbuff))
+                    screen.post_message(OutbuffChanged(self.accumulated_outbuff))
             elif cmd == 'command_aeb_read_hk':
                 aeb_id = aeb_id[0]  # this comes from the args, so it's a list
                 hk_data = HousekeepingData(aeb_id, data, setup)
                 aeb_status = hk_data["STATUS", "AEB_STATUS"]
-                self._app.log(f"AEB_STATE = {aeb_state(aeb_status).name}")
+                screen.log(f"AEB_STATE = {aeb_state(aeb_status).name}")
 
-                # Power in handled by the DEB_DTC_AEB_ONOFF state from the DEB register map above.
+                # Power is/was handled by the DEB_DTC_AEB_ONOFF state from the DEB register map above.
+                # Should I check the AEB_ONOFF from the Register Map? Is there a chance/reason why the AEB_STATE
+                # would not match?
 
                 if aeb_status == aeb_state.OFF:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_onoff", False))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_onoff", False))
                 elif aeb_status == aeb_state.INIT:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_init", True))
                 elif aeb_status == aeb_state.POWER_UP:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_power_up", True))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_power_up", True))
                 elif aeb_status == aeb_state.POWER_DOWN:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_power_down", True))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_power_down", True))
                 elif aeb_status == aeb_state.CONFIG:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_config", True))
                 elif aeb_status == aeb_state.IMAGE:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_image", True))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_image", True))
                 elif aeb_status == aeb_state.PATTERN:
-                    self._app.post_message(AebStateChanged(f"{aeb_id.lower()}_pattern", True))
+                    screen.post_message(AebStateChanged(f"{aeb_id.lower()}_pattern", True))

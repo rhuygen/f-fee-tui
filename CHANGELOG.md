@@ -1,5 +1,14 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.6.0 — 14/10/2024
+
+- [0.6.0] maintenance release to solve refactoring problems and keep Command thread running even when no DPU CS is running.
+  - Command thread would crash when the proxies could not connect to their control servers. That has been solved now by catching the exception and retrying to connect after 10 seconds.
+  - Solved the problem of the Queue join() when the queue contained commands at app termination. Those commands are printed to the console on exit.
+  - Several `post_message()` calls were sent to the App instead of the master screen and were not visible.
+  - Added a button to end the current observation.
+  - Some code refactoring/simplification in `InfoBar`.
+
 ## Version 0.5.6 — 01/10/2024
 
 - [0.5.6] the monitoring panels for DEB mode, AEB state, and DTC_IN_MOD will now be cleared after 10s of inactivity.

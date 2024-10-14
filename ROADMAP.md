@@ -16,7 +16,7 @@
 ### DEB Commanding
 
 - [x] Implement Set FPGA defaults
-- [ ] Implement Sync register map
+- [x] Implement Sync register map -> doesn't need to be implemented since the Register Map is synchronised on each cycle, right after the sync pulse.
 - [x] Fully implement the Immediate ON Sequence
 
 ### AEB Mode
@@ -71,7 +71,7 @@
 ## Help Panel
 
 - [ ] Add global commands to the Help panel
-  - [x] 'Reset frame errors' was addeed
+  - [x] 'Reset frame errors' was added
   - What is a good command to add? Diagnostics?
   - The Help panel is focus aware and displays help that is given in the HELP class variable.
 

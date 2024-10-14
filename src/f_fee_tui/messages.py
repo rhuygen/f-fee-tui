@@ -60,6 +60,20 @@ class ShutdownReached(Message):
 
 class ProblemDetected(Message):
     """A notification message for a problem that needs reporting."""
-    def __init__(self, msg: str,):
+    def __init__(self, msg: str):
+        super().__init__()
+        self.message = msg
+
+
+class CommandThreadCrashed(Message):
+    """The Command Thread caught an Exception and finished."""
+    def __init__(self, exc: Exception):
+        super().__init__()
+        self.exc = exc
+
+
+class LogRetrieved(Message):
+    """A notification with general information."""
+    def __init__(self, msg: str):
         super().__init__()
         self.message = msg

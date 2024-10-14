@@ -2,7 +2,7 @@ import asyncio
 import logging
 import platform
 import time
-from queue import Queue
+from typing import cast
 
 import zmq
 import zmq.asyncio
@@ -23,6 +23,7 @@ from textual.widgets import Footer
 from textual.widgets import Header
 from textual.widgets import Sparkline
 
+from ._queue import ClearableQueue
 from .aeb_command import AEBCommand
 from .aeb_state import AEBState
 from .aeb_state import get_aeb_nr
@@ -32,9 +33,11 @@ from .dtc_in_mod import DtcInMod
 from .general_command import GeneralCommand
 from .infobar import InfoBar
 from .messages import AebStateChanged
+from .messages import CommandThreadCrashed
 from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
+from .messages import LogRetrieved
 from .messages import OutbuffChanged
 from .messages import ProblemDetected
 from .messages import ShutdownReached
@@ -57,7 +60,7 @@ class ResetErrorsCommand(Provider):
 
         self.app.log(f"{score = }")
 
-        master_screen: MasterScreen = self.app.get_screen("master")
+        master_screen: MasterScreen = cast(MasterScreen, self.app.get_screen("master"))
 
         yield Hit(
             score,
@@ -77,9 +80,9 @@ class MasterScreen(Screen):
 
     def __init__(self):
         super().__init__()
-        self._command_q = Queue()
-        self._monitoring_thread = Monitor(self)
-        self._commanding_thread = Command(self, self._command_q)
+        self._command_q = ClearableQueue()
+        self._monitoring_thread = Monitor(self.app)
+        self._commanding_thread = Command(self.app, self._command_q)
 
         self._commanding_disabled = False
         self._commanding_widgets = []
@@ -100,8 +103,8 @@ class MasterScreen(Screen):
             with Horizontal():
                 yield DEBCommand()
                 yield AEBCommand()
-                yield GeneralCommand()
-            yield InfoBar()
+                yield GeneralCommand(self._command_q)
+            yield InfoBar(id="info-bar")
 
     def on_mount(self) -> None:
         self._monitoring_thread.start()
@@ -137,7 +140,8 @@ class MasterScreen(Screen):
         if self._monitoring_thread.is_alive():
             self._monitoring_thread.join()
 
-        self._command_q.join()  # FIXME: this blocks when the DPU CS is not responding or not running
+        self._command_q.clear()
+        self._command_q.join()
 
         self._commanding_thread.cancel()
         if self._commanding_thread.is_alive():
@@ -178,12 +182,14 @@ class MasterScreen(Screen):
     async def set_fpga_defaults(self):
         self.query_one("DEBCommand").disabled = True
         self.query_one("AEBCommand").disabled = True
+        self.query_one("GeneralCommand").disabled = True
 
         self.notify("Set FPGA defaults for the DEB")
         self._command_q.put_nowait(("DPU", "set_fpga_defaults", ['DEB'], {}))
 
         await asyncio.sleep(2.5)
 
+        self.notify("Power ON all AEBs")
         power_on_sequence = [False, False, False, False]
         for idx, aeb_id in enumerate(('AEB1', 'AEB2', 'AEB3', 'AEB4')):
             power_on_sequence[idx] = True
@@ -197,6 +203,7 @@ class MasterScreen(Screen):
 
         self.query_one("DEBCommand").disabled = False
         self.query_one("AEBCommand").disabled = False
+        self.query_one("GeneralCommand").disabled = False
 
     @on(Button.Pressed, ".command.aeb.power")
     def command_aeb_power(self, message: Button.Pressed):
@@ -306,6 +313,16 @@ class MasterScreen(Screen):
         dtc_in_mod_widget = self.query_one(DtcInMod)
         dtc_in_mod_widget.set_state(message)
 
+    def on_log_retrieved(self, message: LogRetrieved):
+        self.log(str(message.message))
+        self.notify(message.message, title="Log INFO")
+
+    def on_command_thread_crashed(self, message: CommandThreadCrashed):
+        # The thread didn't really crash, but there was a communication error, so the Proxies' connect_cs() method
+        # throws a ConnectionError. This exception is caught and after some sleep time the proxies try to reconnect.
+
+        self.log.error(f"Command Thread Crashed: {message.exc}")
+
     def on_exception_caught(self, message: ExceptionCaught):
         self.log(str(message.exc))
         self.log(str(message.tb))
@@ -365,7 +382,7 @@ class MasterScreen(Screen):
                         else:
                             sync_id, response = await handle_single_part(sock, message)
 
-                        self.log(f"Message received for {name} and {MessageIdentifier(sync_id).name}.")
+                        self.log.debug(f"Message received for {name} and {MessageIdentifier(sync_id).name}.")
 
                         props['callback'](self, name, sync_id, response, False)
                         self.query_one(InfoBar).set_active(name, False)
