@@ -1,7 +1,8 @@
 # CHANGELOG for the F-FEE TUI Project
 
-## Version 0.6.0 — 14/10/2024
+## Version 0.6.1 — 14/10/2024
 
+- [0.6.1] updated the help screen content.
 - [0.6.0] maintenance release to solve refactoring problems and keep Command thread running even when no DPU CS is running.
   - Command thread would crash when the proxies could not connect to their control servers. That has been solved now by catching the exception and retrying to connect after 10 seconds.
   - Solved the problem of the Queue join() when the queue contained commands at app termination. Those commands are printed to the console on exit.

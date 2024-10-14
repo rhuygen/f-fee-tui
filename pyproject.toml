@@ -1,6 +1,6 @@
 [project]
 name = "f-fee-tui"
-version = "0.6.0"
+version = "0.6.1"
 description = "A Terminal User Interface to monitor and command the F-FEE for the PLATO Camera."
 keywords = ["PLATO", "F-FEE", "Textual"]
 readme = "README.md"
