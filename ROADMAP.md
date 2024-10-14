@@ -28,9 +28,10 @@
 - [x] Implement AEB Power ON/OFF commands
 - [x] Implement AEB mode changing commands
 
-### Running an SFT
+### General Commanding
 
-### AEU State and commanding
+- [x] Set FPGA defaults
+- [x] End the current observation
 
 ### RMAP Protocol
 

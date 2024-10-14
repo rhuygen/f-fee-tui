@@ -35,3 +35,25 @@ This panel indicates the state of each of the AEBs. This is a translation of the
 ### DTC_IN_MOD
 
 This panel shows which CCD image data is send over which SpaceWire link. It is a translation of the DTC_IN_MOD `Tx_IN_MOD` parameters in the Register Map. The possible combinations are shown in light grey, i.e. AEB1 and AEB2 share the SpW 1 and SpW 2 links, while AEB3 and AEB4 share the SpW 3 and SpW 4 links. In our current commanding strategy, we can only read from one SpaceWire link at a time. The active SpW link will be indicated by a `x` when set. At the bottom of this panel is a sparkline that shows the accumulated errors that were detected in the `OUTBUFF_x` parameters. If this sparkline shows red boxes, it means a SpaceWire transmit buffer overflow was detected for that AEB. If you hover the sparkline, it will show the actual number of errors detected. You can reset these errors by executing the command `Reset frame errors` from the command panel `CTRL-p`.
+
+### DEB Commanding
+
+Pressing one of the buttons in this panel will bring the DEB into that mode. Note however that there is a strict path that needs to be followed to change the mode of the DEB, i.e. ON ⇄ STANDBY ⇄ FULL_IMAGE, or ON ⇄ FULL_IMAGE_PATTERN. 
+
+### AEB Commanding
+
+This panel contains for TABs that can be used to power ON/OFF each AEB, or to change the state of an AEB. Also here the state changes follow a strict path: INIT ⇄ CONFIG ⇄ IMAGE. 
+
+After powering ON an AEB you should wait for 6 seconds before powering another AEB.
+
+### General Commanding
+
+The command buttons in this panel are more general and provide commands that use useful or convenient to have available in this panel.
+
+*Set FPGA Defaults*
+
+This will set the defaults for the DEB and aech of the AEBs. These defaults are loaded from the Setup. All other command buttons will be disabled during this command execution.
+
+*End observation*
+
+This will send an `end_observation` message to the configuration manager.
