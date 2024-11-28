@@ -1,4 +1,8 @@
+from __future__ import annotations
+
+import ast
 import itertools
+from typing import Tuple
 
 from textual.app import ComposeResult
 from textual.widgets import Label
@@ -6,22 +10,63 @@ from textual.widgets import Sparkline
 from textual.widgets import Static
 
 from f_fee_tui.messages import DtcInModChanged
+from egse.setup import load_setup
+
+setup = load_setup()
 
 ON = "✖"
 OFF = ""
 
-T0 = {0b001: "T0-001"}
-T1 = {0b001: "T1-001", 0b010: "T1-010"}
-T2 = {0b001: "T2-001", 0b010: "T2-010"}
-T3 = {0b001: "T3-001"}
-T4 = {0b001: "T4-001"}
-T5 = {0b001: "T5-001", 0b010: "T5-010"}
-T6 = {0b001: "T6-001", 0b010: "T6-010"}
-T7 = {0b001: "T7-001"}
+# From Setup: setup.camera.fee.ccd_numbering.AEB_TO_T_IN_MOD
+
+# │   │   │   └── AEB_TO_T_IN_MOD
+# │   │   │       ├── (1, F): ((0b001, 0, 0, 0), (0, 0, 0, 0))
+# │   │   │       ├── (1, E): ((0, 0, 0b010, 0), (0, 0, 0, 0))
+# │   │   │       ├── (2, F): ((0, 0b010, 0, 0), (0, 0, 0, 0))
+# │   │   │       ├── (2, E): ((0, 0, 0, 0b001), (0, 0, 0, 0))
+# │   │   │       ├── (3, F): ((0, 0, 0, 0), (0b001, 0, 0, 0))
+# │   │   │       ├── (3, E): ((0, 0, 0, 0), (0, 0, 0b010, 0))
+# │   │   │       ├── (4, F): ((0, 0, 0, 0), (0, 0b010, 0, 0))
+# │   │   │       └── (4, E): ((0, 0, 0, 0), (0, 0, 0, 0b001))
+
+AEB_TO_T_IN_MOD = setup.camera.fee.ccd_numbering.AEB_TO_T_IN_MOD
+
+# This translation table is used to map the widget ID to the value of a Tx_IN_MOD.
+
+T0 = {0b001: "T0-001"}                   # AEB1-F
+T1 = {0b001: "T1-001", 0b010: "T1-010"}  # AEB1-E & AEB2-F
+T2 = {0b001: "T2-001", 0b010: "T2-010"}  # AEB2-F & AEB1-E
+T3 = {0b001: "T3-001"}                   # AEB2-E
+T4 = {0b001: "T4-001"}                   # AEB3-F
+T5 = {0b001: "T5-001", 0b010: "T5-010"}  # AEB3-E & AEB4-F
+T6 = {0b001: "T6-001", 0b010: "T6-010"}  # AEB4-F & AEB3-E
+T7 = {0b001: "T7-001"}                   # AEB4-E
+
+# The following list is used below to clear all the widgets with that label id.
 
 ALL_IDS = list(itertools.chain(
         T0.values(), T1.values(), T2.values(), T3.values(), T4.values(), T5.values(), T6.values(), T7.values()
 ))
+
+
+# Map AEB id and side to a Tx_IN_MOD
+
+def aeb_to_tx_in_mod(aeb_id: str, side: str) -> Tuple[int, int] | None:
+    """For a given AEB number and side, this function extracts the index and value of the Tx_IN_MOD."""
+    aeb_nr = aeb_id[-1]
+    key = f"({aeb_nr}, {side})"
+
+    values = list(itertools.chain.from_iterable(ast.literal_eval(AEB_TO_T_IN_MOD[key])))
+
+    for idx, value in enumerate(values):
+        if value:
+            return idx, value
+    else:
+        return None
+
+
+def tx_in_md_to_aeb(in_mod: int) -> Tuple[str, str]:
+    ...
 
 
 class DtcInMod(Static):
@@ -98,8 +143,8 @@ class DtcInMod(Static):
 
     def set_state(self, state: DtcInModChanged):
         self.log(f"{state.t0=}, {state.t1=}, {state.t2=}, {state.t3=}, {state.t4=}, {state.t5=}, {state.t6=}, {state.t7=}")
-        for id_ in ALL_IDS:
-            self.query_one(f"#{id_}", Label).update(OFF)
+
+        self.clear()
 
         if state.t0 == 0b001:
             self.query_one("#T0-001", Label).update(ON)

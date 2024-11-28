@@ -1,5 +1,17 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.7.0 — 28/11/2024
+
+This release adds visualisation of the synchronisation mode and the observation identifier, and adds the start 
+observation command button.
+
+- [0.7.0] Adds the _Start observation_ command which will allow to set a description.
+- [0.7.0] Visualise the sync mode in the lower right corner of the border of the _DEB Mode_ widget.
+- [0.7.0] Visualize the OBSID in the lower right corner of the border of the _General Command_ widget.
+- [0.7.0] To quit the app, you now have to press 'ctrl+q' instead of just 'q'
+- [0.7.0] Small update to the help screen.
+- [0.7.0] WIP on improving DTC_IN_MOD widget.
+
 ## Version 0.6.1 — 14/10/2024
 
 - [0.6.1] updated the help screen content.

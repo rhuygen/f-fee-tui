@@ -11,7 +11,7 @@ class FastFEEApp(App):
     CSS_PATH = "app.tcss"
     SCREENS = {"master": MasterScreen, "help": HelpScreen}
     BINDINGS = [
-        Binding("q", "quit", "Quit"),
+        Binding("ctrl+q", "quit", "Quit"),
         Binding(key="f1", action="help", description="Help", show=True, priority=True),
         Binding("d", "toggle_dark", "Toggle dark mode"),
     ]

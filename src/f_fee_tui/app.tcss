@@ -27,7 +27,7 @@ DEBCommand {
     grid-gutter: 1 2;
 
     height: 15;
-    width: 50;
+    width: 1fr;
     margin: 1;
     padding: 1 1;
 
@@ -87,7 +87,7 @@ AEBCommand {
     background: $boost;
 
     height: 15;
-    width: 1.5fr;
+    width: 2fr;
     margin: 1;
     padding: 0 1;
 
@@ -172,8 +172,14 @@ DtcInMod {
 
 GeneralCommand {
 
-    layout: vertical;
     background: $boost;
+
+    layout: grid;
+
+    grid-size: 1 3;
+    grid-rows: 1fr;
+    grid-columns: 1fr;
+    grid-gutter: 1 2;
 
     height: 15;
     width: 1fr;
@@ -185,6 +191,37 @@ GeneralCommand {
     border-title-color: grey;
     border-title-style: bold;
 
+    Button {
+        width: 1fr;
+    }
+}
+
+InputStringDialog {
+    align: center middle;
+}
+
+InputStringDialog > Vertical {
+    border: thick $primary 50%;
+    width: 50%;
+    height: 16;
+    background: $boost;
+    Label {
+        text-style: bold;
+        margin: 2 4;
+    }
+    Input {
+        margin: 2 2;
+    }
+    Button {
+        margin: 0 2;
+    }
+    Horizontal {
+        width: 100%;
+        align: center top;
+        #btn-dialog-yes {
+            margin-right: 2;
+        }
+    }
 }
 
 OnOffLedWithLabel {

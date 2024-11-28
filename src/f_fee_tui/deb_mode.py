@@ -1,3 +1,4 @@
+from textual import events
 from textual.app import ComposeResult
 from textual.widgets import Static
 
@@ -15,6 +16,11 @@ class DEBMode(Static):
         yield OnOffLedWithLabel("WINDOWING", False, id="deb-windowing")
         yield OnOffLedWithLabel("WINDOWING_PATTERN", False, id="deb-windowing-pattern")
 
+    def on_mount(self) -> None:
+        self.border_subtitle = "external sync"
+
     def clear(self):
         for widget in self.query(OnOffLedWithLabel):
             widget.state = False
+
+        self.border_subtitle = "external sync"

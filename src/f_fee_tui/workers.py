@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 
 import zmq
 from egse.confman import ConfigurationManagerProxy
+from egse.control import Failure
+from egse.control import Success
 from egse.dpu.fdpu import FastCameraDPUProxy
 from egse.fee.ffee import HousekeepingData
 from egse.fee.ffee import aeb_state
@@ -22,13 +24,16 @@ from egse.zmq import MessageIdentifier
 from textual.app import App
 
 from .messages import AebStateChanged
+from .messages import CommandFailed
 from .messages import CommandThreadCrashed
 from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import LogRetrieved
+from .messages import ObsidChanged
 from .messages import OutbuffChanged
 from .messages import ShutdownReached
+from .messages import SyncModeChanged
 from .messages import TimeoutReached
 
 if TYPE_CHECKING:
@@ -37,6 +42,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger("egse.f-fee-tui")
 
 dpu = Settings.load("DPU Processor")
+cm = Settings.load("Configuration Manager Control Server")
 
 
 class Command(threading.Thread):
@@ -65,18 +71,26 @@ class Command(threading.Thread):
                         try:
                             target, command, args, kwargs = self._command_q.get_nowait()
                             self._command_q.task_done()
-                            screen.post_message(LogRetrieved(f"Executing command '{command}'"))
+                            screen.log.info(f"Executing command '{command}'")
                             rc = self.execute_command(target, command, args, kwargs)
-                            screen.post_message(LogRetrieved(f"Command '{command}' executed: {rc = }"))
+                            if isinstance(rc, Success):
+                                msg = rc.return_code
+                            else:
+                                msg = rc
+                            screen.log.info(f"Command '{command}' executed: {msg = !s}")
                         except queue.Empty:
                             time.sleep(0.1)  # Sleep briefly to avoid busy-waiting
                             continue
                         except Exception as exc:
-                            _LOGGER.error(f"Caught and exception: {exc}")
+                            screen.log.error(f"Caught and exception: {exc}")
                             tb = traceback.format_exc()
                             screen.post_message(ExceptionCaught(exc, tb))
             except ConnectionError as exc:
                 screen.post_message(CommandThreadCrashed(exc))
+
+            # FIXME: It would be good to know here which service is not responding, so we can still use the other
+            #        proxies to send commands.
+
             if self.sleep_or_break(10.0):
                 break
 
@@ -105,18 +119,21 @@ class Command(threading.Thread):
 
         if target == "DPU":
             try:
-                screen.log.info(f"Running DPU command: {command}({args}, {kwargs})")
                 response = getattr(self._f_dpu, command)(*args, **kwargs)
-                screen.log.info(f"Response: {response}")
+                screen.log.info(f"Running DPU command: {command}({args}, {kwargs})\n"
+                                f"Response: {response}")
+                if isinstance(response, Failure):
+                    screen.post_message(CommandFailed(response.message))
                 return response
             except AttributeError as exc:
                 screen.log.warning(f"No such command for DPU: {command}", exc_info=True)
 
         elif target == "CM_CS":
             try:
-                screen.log.info(f"Running CM_CS command: {command}({args}, {kwargs})")
                 response = getattr(self._cm_cs, command)(*args, **kwargs)
-                screen.log.info(f"Response: {response}")
+                screen.log.info(f"Running CM_CS command: {command}({args}, {kwargs})\nResponse: {response}")
+                if isinstance(response, Failure):
+                    screen.post_message(CommandFailed(response.message))
                 return response
             except AttributeError as exc:
                 screen.log.warning(f"No such command for CM_CS: {command}", exc_info=True)
@@ -150,10 +167,15 @@ class Monitor(threading.Thread):
         """Flag to track if a shutdown has been reported or not."""
 
         context = zmq.Context.instance()
+
         receiver = context.socket(zmq.SUB)
         receiver.setsockopt(zmq.SUBSCRIBE, MessageIdentifier.F_FEE_REGISTER_MAP.to_bytes(1, byteorder='big'))
         receiver.setsockopt(zmq.SUBSCRIBE, MessageIdentifier.SYNC_HK_DATA.to_bytes(1, byteorder='big'))
         receiver.connect(f"tcp://{self.hostname}:{self.port}")
+
+        moni_cm: zmq.Socket = context.socket(zmq.SUB)
+        moni_cm.subscribe(b'')
+        moni_cm.connect(f"tcp://{cm.HOSTNAME}:{cm.MONITORING_PORT}")
 
         setup = load_setup()
 
@@ -167,7 +189,7 @@ class Monitor(threading.Thread):
                 self.accumulated_outbuff = [0, 0, 0, 0, 0, 0, 0, 0]
                 screen.post_message(OutbuffChanged(self.accumulated_outbuff))
 
-            socket_list, _, _ = zmq.select([receiver], [], [], timeout=0.1)
+            socket_list, _, _ = zmq.select([receiver, moni_cm], [], [], timeout=0.1)
 
             if receiver in socket_list:
                 start_time = time.monotonic()
@@ -178,6 +200,15 @@ class Monitor(threading.Thread):
                     sync_id = int.from_bytes(sync_id, byteorder='big')
                     data = pickle.loads(pickle_string)
                     self.handle_messages(sync_id, data, setup)
+                except Exception as exc:
+                    tb = traceback.format_exc()
+                    screen.post_message(ExceptionCaught(exc, tb))
+
+            if moni_cm in socket_list:
+                try:
+                    pickle_string = moni_cm.recv()
+                    data = pickle.loads(pickle_string)
+                    self.handle_cm_status(data)
                 except Exception as exc:
                     tb = traceback.format_exc()
                     screen.post_message(ExceptionCaught(exc, tb))
@@ -200,6 +231,11 @@ class Monitor(threading.Thread):
 
     def reset_frame_errors(self):
         self._reset_frame_errors.set()
+
+    def handle_cm_status(self, data: dict):
+        obsid = data['obsid']
+        screen = self._app.get_screen("master")
+        screen.post_message(ObsidChanged(obsid))
 
     def handle_messages(self, sync_id, data, setup):
 
@@ -224,6 +260,10 @@ class Monitor(threading.Thread):
             screen.log(f"{t0=}, {t1=}, {t2=}, {t3=}, {t4=}, {t5=}, {t6=}, {t7=}")
 
             screen.post_message(DtcInModChanged(t0, t1, t2, t3, t4, t5, t6, t7))
+
+            sync_mode = register_map["DEB_DTC_SEL_TRG", "TRG_SRC"]
+
+            screen.post_message(SyncModeChanged(sync_mode))
 
         elif sync_id == MessageIdentifier.SYNC_HK_DATA:
 

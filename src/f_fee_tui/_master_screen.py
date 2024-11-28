@@ -29,18 +29,22 @@ from .aeb_state import AEBState
 from .aeb_state import get_aeb_nr
 from .deb_command import DEBCommand
 from .deb_mode import DEBMode
+from .dialogs import InputStringDialog
 from .dtc_in_mod import DtcInMod
 from .general_command import GeneralCommand
 from .infobar import InfoBar
 from .messages import AebStateChanged
+from .messages import CommandFailed
 from .messages import CommandThreadCrashed
 from .messages import DebModeChanged
 from .messages import DtcInModChanged
 from .messages import ExceptionCaught
 from .messages import LogRetrieved
+from .messages import ObsidChanged
 from .messages import OutbuffChanged
 from .messages import ProblemDetected
 from .messages import ShutdownReached
+from .messages import SyncModeChanged
 from .messages import TimeoutReached
 from .services import handle_multi_part
 from .services import handle_single_part
@@ -205,6 +209,41 @@ class MasterScreen(Screen):
         self.query_one("AEBCommand").disabled = False
         self.query_one("GeneralCommand").disabled = False
 
+    @on(Button.Pressed, "#btn-start-observation")
+    def command_start_observation(self):
+        self.start_observation()
+
+    @work()
+    async def start_observation(self):
+
+        description = "Starting a new observation using the 'f-fee-tui'."
+
+        description = await self.app.push_screen_wait(
+            InputStringDialog(
+                default_input=description,
+                title="Describe the observation briefly"
+            )
+        )
+
+        if description is None:
+            return
+
+        function_info = {
+            'description': description,
+        }
+
+        self.notify("Starting a new observation")
+        self._command_q.put_nowait(("CM_CS", "start_observation", [function_info], {}))
+
+    @on(Button.Pressed, "#btn-end-observation")
+    def command_end_observation(self):
+        self.end_observation()
+
+    def end_observation(self):
+
+        self.notify("Ending the current observation")
+        self._command_q.put_nowait(("CM_CS", "end_observation", [], {}))
+
     @on(Button.Pressed, ".command.aeb.power")
     def command_aeb_power(self, message: Button.Pressed):
         button = message.button
@@ -327,6 +366,9 @@ class MasterScreen(Screen):
         self.log(str(message.exc))
         self.log(str(message.tb))
 
+    def on_command_failed(self, message: CommandFailed):
+        self.notify(message.message, severity="error", title="Command failed", timeout=8.0)
+
     def on_problem_detected(self, problem: ProblemDetected):
         self.notify(problem.message, severity="warning", title="WARNING")
 
@@ -338,6 +380,16 @@ class MasterScreen(Screen):
         self.query_one("#deb_modes", DEBMode).clear()
         self.query_one("#aeb_states", AEBState).clear()
         self.query_one("#dtc_in_mod", DtcInMod).clear()
+
+    def on_sync_mode_changed(self, message: SyncModeChanged):
+        sync_mode = message.sync_mode
+        self.query_one(DEBMode).border_subtitle = f"{'internal' if sync_mode == 1 else 'external'} sync"
+
+    def on_obsid_changed(self, message: ObsidChanged):
+        if obsid := message.obsid:
+            self.query_one(GeneralCommand).border_subtitle = str(obsid)
+        else:
+            self.query_one(GeneralCommand).border_subtitle = "no observation running"
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""

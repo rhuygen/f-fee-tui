@@ -7,21 +7,45 @@
 	- are the AEU CS sub-processes running?
     - What do we do when any of those fail? Report this on the screen and wait? Provide a retry button?
 
-## Widgets
+## Monitoring Widgets
+
+The monitoring widgets are those widgets that show the current and active state of the F-FEE. It is not possible to
+command the F-FEE from these widgets, see the Commanding Widgets below.
 
 ### DEB Mode
 
-- [x]  The DEB mode shall be updated from the DEB HK instead of the Register Map. The register map might be out of sync with the F-FEE for several reasons (mainly synchronisation issues). The DEB HK is sent on every cycle right after the timecode and accurately reflects the state of the DEB.
-
-### DEB Commanding
-
-- [x] Implement Set FPGA defaults
-- [x] Implement Sync register map -> doesn't need to be implemented since the Register Map is synchronised on each cycle, right after the sync pulse.
-- [x] Fully implement the Immediate ON Sequence
+- [x]  The DEB mode shall be updated from the DEB HK instead of the Register Map. The register map might be out of sync
+  with the F-FEE for several reasons (mainly synchronisation issues). The DEB HK is sent on every cycle right after the
+  timecode and accurately reflects the state of the DEB.
 
 ### AEB Mode
 
 - [x] The AEB State shall be determined from the AEB HK data that is sent every cycle.
+
+### DTC_IN_MOD
+
+- [x] Indicate which SpW is used to transfer data
+- [x] Indicate the accumulated errors on each of the SpW channels (taken from OUTBUFF_x)
+
+### Other widgets
+
+- [x] we need to visualize if the F-FEE is in internal or external sync (DEB: DTC_SEL_TRG/TRG_SRC), 0=external 
+  source, 1=internal source. This information is in the DEB Register. -> The _DEB Mode_ now contains the sync mode in the 
+  lower right border.
+- [x] we need to visualize if an observation is running. -> The _General Commanding_ now contains the OBSID in the 
+  lower right border.
+
+## Commanding Widgets
+
+The commanding widgets are used to command the F-FEE into a requested mode. The commanding widgets are disabled by 
+default and can be enabled with the `ctrl-k` keyboard shortcut.
+
+### DEB Commanding
+
+- [x] Implement Set FPGA defaults
+- [x] Implement Sync register map -> doesn't need to be implemented since the Register Map is synchronised on each
+  cycle, right after the sync pulse.
+- [x] Fully implement the Immediate ON Sequence
 
 ### AEB Commanding
 
@@ -31,13 +55,17 @@
 ### General Commanding
 
 - [x] Set FPGA defaults
+- [x] Start a new observation
 - [x] End the current observation
 
 ### RMAP Protocol
 
 - [ ] This needs specific commanding in the F-DPU to create an RMAP packet and send it over transport.
 
-## Monitoring
+
+## Workers
+
+### Monitoring 
 
 - [x] Monitoring is a background thread that connects to the F-DPU and the DATA_DISTRIBUTION_PORT, subscribing to F_REGISTER_MAP and SYNC_HK_DATA.
 - [ ] Do we also need monitoring on the MONITORING_PORT?
@@ -59,13 +87,14 @@
 
 - [ ] Shall we try to implement monitoring asynchronously instead of with threads?  
 
-## Commanding
+
+### Commanding
 
 - [x] How are we going to implement commanding? In a similar background thread like Monitoring or with individual workers? -> Implemented a Commanding Thread.
 - [x] Implement AEB Power ON/OFF commanding
 - [x] Implement AEB mode change commanding
 - What about non FEE related commands that are nevertheless useful?
-  - start/end observation
+  - [x] start/end observation -> see General commanding
   - 
 
 

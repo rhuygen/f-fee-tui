@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from textual.message import Message
 
 
@@ -72,8 +74,29 @@ class CommandThreadCrashed(Message):
         self.exc = exc
 
 
+class CommandFailed(Message):
+    """A command execution fFailed."""
+    def __init__(self, msg: str):
+        super().__init__()
+        self.message = msg
+
+
 class LogRetrieved(Message):
     """A notification with general information."""
     def __init__(self, msg: str):
         super().__init__()
         self.message = msg
+
+
+class SyncModeChanged(Message):
+    """Synchronisation mode has changed."""
+    def __init__(self, sync_mode: int):
+        super().__init__()
+        self.sync_mode = sync_mode
+
+
+class ObsidChanged(Message):
+    """The observation identifier has changed."""
+    def __init__(self, obsid: str | None):
+        super().__init__()
+        self.obsid = obsid
