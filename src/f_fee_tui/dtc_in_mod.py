@@ -30,6 +30,7 @@ OFF = ""
 # │   │   │       └── (4, E): ((0, 0, 0, 0), (0, 0, 0, 0b001))
 
 AEB_TO_T_IN_MOD = setup.camera.fee.ccd_numbering.AEB_TO_T_IN_MOD
+AEB_ID_TO_CCD_ID = setup.camera.fee.ccd_numbering.AEB_ID_TO_CCD_ID
 
 # This translation table is used to map the widget ID to the value of a Tx_IN_MOD.
 
@@ -122,10 +123,8 @@ class DtcInMod(Static):
         # Current AEB ID to CCD ID -> [3, 2, 1, 4]
 
         yield Label("", classes="sub-header")
-        yield Label("CCD3", classes="two-cols sub-header")
-        yield Label("CCD2", classes="two-cols sub-header")
-        yield Label("CCD1", classes="two-cols sub-header")
-        yield Label("CCD4", classes="two-cols sub-header")
+        for idx in range(1, 5):
+            yield Label(f"CCD{AEB_ID_TO_CCD_ID[idx]}", classes="two-cols sub-header")
 
         yield Label("", classes="footer")
         yield Label("F", classes="one-col footer")
