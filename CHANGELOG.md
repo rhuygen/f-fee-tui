@@ -1,5 +1,12 @@
 # CHANGELOG for the F-FEE TUI Project
 
+## Version 0.7.1 – 01/12/2024
+
+A small release that adds a line with CCD numbers to the IN_MOD widget.
+
+- [0.7.1] renamed IN_MOD widget to DEB Data Source
+- [0.7.1] added a line with CCD numbers to the IN_MOD widget 
+
 ## Version 0.7.0 — 28/11/2024
 
 This release adds visualisation of the synchronisation mode and the observation identifier, and adds the start 
