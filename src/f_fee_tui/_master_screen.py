@@ -124,7 +124,7 @@ class MasterScreen(Screen):
         aeb_state_widget.border_title = "AEB State"
 
         in_mod_widget = self.query_one(DtcInMod)
-        in_mod_widget.border_title = "DTC IN_MOD"
+        in_mod_widget.border_title = "DEB Data Source"
 
         aeb_command_widget = self.query_one(AEBCommand)
         aeb_command_widget.border_title = "AEB Commanding"
