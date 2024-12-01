@@ -1,9 +1,10 @@
 # CHANGELOG for the F-FEE TUI Project
 
-## Version 0.7.1 – 01/12/2024
+## Version 0.7.2 – 01/12/2024
 
 A small release that adds a line with CCD numbers to the IN_MOD widget.
 
+- [0.7.2] the line with CCD numbers is now derived from the AEB id
 - [0.7.1] renamed IN_MOD widget to DEB Data Source
 - [0.7.1] added a line with CCD numbers to the IN_MOD widget 
 
