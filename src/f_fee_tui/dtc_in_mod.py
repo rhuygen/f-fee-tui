@@ -119,6 +119,14 @@ class DtcInMod(Static):
         yield Label("", id="T6-001", classes="one-col")    # AEB4-F
         yield Label("", id="T7-001", classes="one-col")    # AEB4-E
 
+        # Current AEB ID to CCD ID -> [3, 2, 1, 4]
+
+        yield Label("", classes="sub-header")
+        yield Label("CCD3", classes="two-cols sub-header")
+        yield Label("CCD2", classes="two-cols sub-header")
+        yield Label("CCD1", classes="two-cols sub-header")
+        yield Label("CCD4", classes="two-cols sub-header")
+
         yield Label("", classes="footer")
         yield Label("F", classes="one-col footer")
         yield Label("E", classes="one-col footer")
